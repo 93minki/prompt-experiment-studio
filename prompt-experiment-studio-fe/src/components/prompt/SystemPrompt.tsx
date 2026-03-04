@@ -12,9 +12,9 @@ const SystemPrompt = () => {
   };
 
   return (
-    <div className="">
+    <div className="flex flex-col">
       {open && (
-        <div className="flex flex-col gap-2">
+        <div className="flex items-stretch gap-1">
           <Textarea
             placeholder="System Message 를 작성해주세요"
             value={systemMessage}
@@ -22,7 +22,7 @@ const SystemPrompt = () => {
               setSystemMessage(e.target.value)
             }
           />
-          <Button>저장하기</Button>
+          <Button className="h-full">저장</Button>
         </div>
       )}
       <div className="flex items-center gap-2">
@@ -30,7 +30,7 @@ const SystemPrompt = () => {
           className={`${open ? "rotate-180" : ""}`}
           onClick={handleOpenChange}
         />
-        <span>{open ? "Hide" : "Show"}</span>
+        <span>{open ? "닫기" : "System Prompt 열기"}</span>
       </div>
     </div>
   );

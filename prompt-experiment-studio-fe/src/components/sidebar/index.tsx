@@ -6,24 +6,25 @@ import {
   SidebarGroup,
   SidebarHeader,
   SidebarTrigger,
+  useSidebar,
 } from "../ui/sidebar";
 
 const SidebarContainer = () => {
+  const { state } = useSidebar();
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <SidebarTrigger />
+        <SidebarTrigger className="self-end" />
+        {state === "expanded" ? (
+          <Button>New Session</Button>
+        ) : (
+          <Button>+</Button>
+        )}
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup className="flex flex-col gap-2">
-          <Button
-            className="text-sm font-medium border p-2"
-            onClick={() => {
-              console.log("Click History");
-            }}
-          >
-            History
-          </Button>
+          <Button className="text-sm">History1</Button>
           <Button className="text-sm">History2</Button>
           <Button className="text-sm">History3</Button>
           <Button className="text-sm">History4</Button>
