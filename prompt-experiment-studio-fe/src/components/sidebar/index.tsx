@@ -1,11 +1,16 @@
+import { Settings } from "lucide-react";
+import SystemPrompt from "../prompt/SystemPrompt";
 import { Button } from "../ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import {
@@ -16,10 +21,10 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem,
   SidebarTrigger,
   useSidebar,
 } from "../ui/sidebar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 
 const SidebarContainer = () => {
   const { state } = useSidebar();
@@ -36,38 +41,57 @@ const SidebarContainer = () => {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup className="flex flex-col gap-2">
-          <Button className="text-sm">History1</Button>
-          <Button className="text-sm">History2</Button>
-          <Button className="text-sm">History3</Button>
-          <Button className="text-sm">History4</Button>
+          <SidebarMenuButton>Hello</SidebarMenuButton>
+          <SidebarMenuButton>Hello</SidebarMenuButton>
+          <SidebarMenuButton>Hello</SidebarMenuButton>
+          <SidebarMenuButton>Hello</SidebarMenuButton>
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
-          <SidebarMenuItem>
-            <DropdownMenu>
-              <div className="flex justify-between">
-                <DropdownMenuTrigger asChild className="">
-                  <SidebarMenuButton>API Key</SidebarMenuButton>
-                </DropdownMenuTrigger>
-              </div>
-              <DropdownMenuContent side="right">
-                <DropdownMenuGroup>
-                  <DropdownMenuLabel>
-                    <Label>GPT</Label>
+          <Dialog>
+            <DialogTrigger
+              className={`${state === "expanded" ? "self-end" : "self-center"}`}
+            >
+              <Settings />
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Settings</DialogTitle>
+                <DialogDescription>
+                  System Prompt, Human Prompt, Assistant Prompt 를 설정할 수
+                  있습니다.
+                </DialogDescription>
+              </DialogHeader>
+              <Tabs>
+                <TabsList>
+                  <TabsTrigger value="prompt">Prompt</TabsTrigger>
+                  <TabsTrigger value="api">API</TabsTrigger>
+                </TabsList>
+                <TabsContent value="prompt">
+                  <SystemPrompt />
+                </TabsContent>
+                <TabsContent value="api" className="flex flex-col gap-4 pt-4">
+                  <Label htmlFor="gpt" className="flex flex-col gap-1">
+                    <span className="text-sm font-medium self-start">GPT</span>
                     <Input type="text" placeholder="API Key" />
-                  </DropdownMenuLabel>
-                  <DropdownMenuLabel>
-                    <Label>Gemini</Label>
+                  </Label>
+                  <Label htmlFor="gemini" className="flex flex-col gap-1">
+                    <span className="text-sm font-medium self-start">
+                      Gemini
+                    </span>
                     <Input type="text" placeholder="API Key" />
-                  </DropdownMenuLabel>
-                  <DropdownMenuLabel>
-                    <Button>Save</Button>
-                  </DropdownMenuLabel>
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
+                  </Label>
+                  <Button>저장</Button>
+                </TabsContent>
+              </Tabs>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="outline">닫기</Button>
+                </DialogClose>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>

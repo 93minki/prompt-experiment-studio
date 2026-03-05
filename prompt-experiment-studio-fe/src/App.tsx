@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import HumanPrompt from "./components/prompt/HumanPrompt";
-import SystemPrompt from "./components/prompt/SystemPrompt";
 
 const App = () => {
   const [prevQuestion, setPrevQuestion] = useState<string[]>([]);
@@ -19,8 +18,7 @@ const App = () => {
 
   return (
     <main className="flex w-full h-screen">
-      <div className="flex flex-col gap-2 w-full py-2 min-h-0 flex-1">
-        <SystemPrompt />
+      <div className="flex flex-col gap-2 w-full py-2 min-h-0 flex-1 p-4">
         <div
           ref={scrollContainerRef}
           className="flex-1 min-h-0 border border-black rounded-md p-2 overflow-y-auto max-h-full"
