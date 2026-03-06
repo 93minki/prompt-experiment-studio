@@ -1,0 +1,56 @@
+@baseUrl = http://127.0.0.1:8000
+
+### 0) health check
+GET {{baseUrl}}/
+
+### 1) 테스트용 세션 생성
+# @name createChatSession
+POST {{baseUrl}}/chat-sessions/
+Content-Type: application/json
+
+{
+  "title": "E2E system prompt flow"
+}
+
+### 2) 생성된 세션 ID 확인
+@chatSessionId = {{createChatSession.response.body.$.id}}
+
+### 3) 현재 system prompt 조회 (v1 기본값)
+GET {{baseUrl}}/chat-sessions/{{chatSessionId}}/system-prompts/current
+
+### 4) system prompt 업데이트 -> v2 생성
+PUT {{baseUrl}}/chat-sessions/{{chatSessionId}}/system-prompts
+Content-Type: application/json
+
+{
+  "content": "You are a senior Python tutor. Answer in Korean."
+}
+
+### 5) system prompt 업데이트 -> v3 생성
+PUT {{baseUrl}}/chat-sessions/{{chatSessionId}}/system-prompts
+Content-Type: application/json
+
+{
+  "content": "You are a strict reviewer. Keep answers short."
+}
+
+### 6) 이력 조회 (v3 current, v2/v1 history)
+GET {{baseUrl}}/chat-sessions/{{chatSessionId}}/system-prompts
+
+### 7) v1을 current로 활성화
+PATCH {{baseUrl}}/chat-sessions/{{chatSessionId}}/system-prompts/1/activate
+
+### 8) 현재 system prompt 다시 조회 (v1인지 확인)
+GET {{baseUrl}}/chat-sessions/{{chatSessionId}}/system-prompts/current
+
+### 9) 비현재 버전(v2) 삭제
+DELETE {{baseUrl}}/chat-sessions/{{chatSessionId}}/system-prompts/2
+
+### 10) 삭제 후 이력 조회 (v2 제거 확인)
+GET {{baseUrl}}/chat-sessions/{{chatSessionId}}/system-prompts
+
+### 11) 현재 버전(v1) 삭제 시도 -> 400 기대
+DELETE {{baseUrl}}/chat-sessions/{{chatSessionId}}/system-prompts/1
+
+### 12) 테스트 종료 후 세션 삭제(원하면 실행)
+DELETE {{baseUrl}}/chat-sessions/{{chatSessionId}}
