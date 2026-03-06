@@ -1,0 +1,51 @@
+@baseUrl = http://127.0.0.1:8000
+
+### 0) health check
+GET {{baseUrl}}/
+
+### 1) OpenAI 키 생성(또는 provider가 이미 있으면 교체)
+POST {{baseUrl}}/llm-api-keys/
+Content-Type: application/json
+
+{
+  "provider": "openai",
+  "api_key": "sk-test-openai-1234567890"
+}
+
+### 2) Gemini 키 생성
+POST {{baseUrl}}/llm-api-keys/
+Content-Type: application/json
+
+{
+  "provider": "gemini",
+  "api_key": "gemini-test-key-abcdef123456"
+}
+
+### 3) 전체 키 목록 조회 (api_key_masked 확인)
+GET {{baseUrl}}/llm-api-keys/
+
+### 4) OpenAI 키 값 갱신
+PATCH {{baseUrl}}/llm-api-keys/openai
+Content-Type: application/json
+
+{
+  "api_key": "sk-updated-openai-9999999999"
+}
+
+### 5) OpenAI 활성/비활성 변경 (쿼리 파라미터)
+PATCH {{baseUrl}}/llm-api-keys/openai/active?is_active=false
+
+### 6) 다시 목록 조회 (openai is_active=false 확인)
+GET {{baseUrl}}/llm-api-keys/
+
+### 7) OpenAI 다시 활성화
+PATCH {{baseUrl}}/llm-api-keys/openai/active?is_active=true
+
+### 8) Gemini 키 삭제
+DELETE {{baseUrl}}/llm-api-keys/gemini
+
+### 9) 삭제 후 목록 조회
+GET {{baseUrl}}/llm-api-keys/
+
+### 10) 존재하지 않는 provider 삭제 시도 (404 기대)
+DELETE {{baseUrl}}/llm-api-keys/not-exist
