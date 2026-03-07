@@ -5,6 +5,21 @@ from sqlalchemy.sql.operators import is_associative
 
 from models.llm_api import LLMApiKeyModel
 
+PROVIDER_ALIASES = {"gemini": "google"}
+
+
+def normalize_provider(provider: str) -> str:
+    raw = provider.strip().lower()
+    return PROVIDER_ALIASES.get(raw, raw)
+
+
+def _provider_candidates(provider: str) -> list[str]:
+    raw = provider.strip().lower()
+    normalized = normalize_provider(raw)
+    if raw == normalized:
+        return [normalized]
+    return [normalized, raw]
+
 
 def _mask_api_key(api_key: str) -> str:
     if len(api_key) <= 8:
@@ -13,7 +28,21 @@ def _mask_api_key(api_key: str) -> str:
 
 
 def get_by_provider(db: Session, provider: str) -> Optional[LLMApiKeyModel]:
-    return db.query(LLMApiKeyModel).filter(LLMApiKeyModel.provider == provider).first()
+    candidates = _provider_candidates(provider)
+    return (
+        db.query(LLMApiKeyModel).filter(LLMApiKeyModel.provider.in_(candidates)).first()
+    )
+
+
+def get_active_by_provider(db: Session, provider: str) -> Optional[LLMApiKeyModel]:
+    candidates = _provider_candidates(provider)
+    return (
+        db.query(LLMApiKeyModel)
+        .filter(
+            LLMApiKeyModel.provider.in_(candidates), LLMApiKeyModel.is_active.is_(True)
+        )
+        .first()
+    )
 
 
 def create_or_update_api_key(
@@ -21,9 +50,11 @@ def create_or_update_api_key(
     provider: str,
     api_key: str,
 ) -> LLMApiKeyModel:
-    existing = get_by_provider(db, provider)
+    normalized_provider = normalize_provider(provider)
+    existing = get_by_provider(db, normalized_provider)
 
     if existing:
+        existing.provider = normalized_provider
         existing.api_key = api_key
         existing.is_active = True
         db.add(existing)
@@ -32,7 +63,7 @@ def create_or_update_api_key(
         return existing
 
     row = LLMApiKeyModel(
-        provider=provider,
+        provider=normalized_provider,
         api_key=api_key,
         is_active=True,
     )

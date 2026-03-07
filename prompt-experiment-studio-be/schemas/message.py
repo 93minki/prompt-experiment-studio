@@ -6,8 +6,7 @@ from pydantic import BaseModel, Field
 
 class ChatTurnCreate(BaseModel):
     user_message: str = Field(..., min_length=1)
-    assistant_message: str = Field(..., min_length=1)
-    summary_text: Optional[str] = None
+    model: str = Field(default="gpt-4o", min_length=1)
 
 
 class MessageRead(BaseModel):
@@ -32,3 +31,10 @@ class MessageSummaryRead(BaseModel):
     updated_at: datetime
 
     model_config = {"from_attributes": True}
+
+class ChatTurnRead(BaseModel):
+  user: MessageRead
+  assistant: MessageRead
+  summary: MessageSummaryRead
+  
+  
