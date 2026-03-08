@@ -11,8 +11,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
 import {
   Sidebar,
   SidebarContent,
@@ -25,6 +23,7 @@ import {
   useSidebar,
 } from "../ui/sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import ApiConnection from "./ApiConnection";
 
 const SidebarContainer = () => {
   const { state } = useSidebar();
@@ -71,19 +70,7 @@ const SidebarContainer = () => {
                 <TabsContent value="prompt">
                   <SystemPrompt />
                 </TabsContent>
-                <TabsContent value="api" className="flex flex-col gap-4 pt-4">
-                  <Label htmlFor="gpt" className="flex flex-col gap-1">
-                    <span className="text-sm font-medium self-start">GPT</span>
-                    <Input type="text" placeholder="API Key" />
-                  </Label>
-                  <Label htmlFor="gemini" className="flex flex-col gap-1">
-                    <span className="text-sm font-medium self-start">
-                      Gemini
-                    </span>
-                    <Input type="text" placeholder="API Key" />
-                  </Label>
-                  <Button>저장</Button>
-                </TabsContent>
+                <ApiConnection />
               </Tabs>
               <DialogFooter>
                 <DialogClose asChild>
