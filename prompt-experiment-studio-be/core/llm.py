@@ -55,32 +55,3 @@ def invoke_chat(model: str, api_key: str, system_prompt: str, user_message: str)
         ]
     )
     return _content_to_text(response.content)
-
-
-class LLM:
-    _instance = dict[str, "LLM"] = {}
-
-    def __init__(self, model: str):
-        self.model = model
-        self.initialize_llm()
-
-    def initialize_llm(self):
-        if self.model in SUPPORTED_MODELS["openai"]:
-            self.llm = ChatOpenAI(model=self.model)
-        elif self.model in SUPPORTED_MODELS["google"]:
-            self.llm = ChatGoogleGenerativeAI(model=self.model)
-        elif self.model in SUPPORTED_MODELS["anthropic"]:
-            self.llm = ChatAnthropic(model=self.model)
-        else:
-            raise ValueError(f"Unsupported model: {self.model}")
-
-    @classmethod
-    def get_instance(cls, model: str = "gpt-4o"):
-        inst = cls._instance.get(model)
-        if inst is None:
-            inst = cls(model)
-            cls._instance[model] = inst
-        return inst
-
-    def get_llm(self):
-        return self.llm

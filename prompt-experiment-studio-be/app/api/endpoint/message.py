@@ -5,12 +5,18 @@ from core.database import get_db
 from repositories import chat_session_repository as chat_session_repo
 from repositories import message_repository as message_repo
 from repositories import system_prompt_repository as system_prompt_repo
-from schemas.message import ChatTurnCreate, MessageRead, MessageSummaryRead
+from schemas.message import (
+    ChatTurnCreate,
+    MessageRead,
+    MessageSummaryRead,
+    ChatTurnRead,
+)
+from services.chat_turn_service import run_chat_turn_with_llm
 
 router = APIRouter(prefix="/chat-sessions", tags=["messages"])
 
 
-@router.post("/{chat_session_id}/messages/turn", response_model=list[MessageRead])
+@router.post("/{chat_session_id}/messages/turn", response_model=ChatTurnRead)
 def create_chat_turn(
     chat_session_id: int,
     payload: ChatTurnCreate,
@@ -23,31 +29,17 @@ def create_chat_turn(
             detail="Chat session not found",
         )
 
-    current_prompt = system_prompt_repo.get_current_system_prompt(db, chat_session_id)
-    if not current_prompt:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Current system prompt not found",
-        )
-
-    user_row, assistant_row = message_repo.create_chat_turn(
-        db=db,
-        chat_session_id=chat_session_id,
-        user_message=payload.user_message,
-        assistant_message=payload.assistant_message,
-        system_prompt_version=current_prompt.version,
-    )
-
-    if payload.summary_text and payload.summary_text.strip():
-        message_repo.upsert_message_summary(
+    try:
+        user_row, assistant_row, summary_row = run_chat_turn_with_llm(
             db=db,
             chat_session_id=chat_session_id,
-            summary_text=payload.summary_text,
-            summary_until_message_id=assistant_row.id,
-            based_on_system_prompt_version=current_prompt.version,
+            user_message=payload.user_message,
+            model=payload.model,
         )
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
-    return [user_row, assistant_row]
+    return {"user": user_row, "assistant": assistant_row, "summary": summary_row}
 
 
 @router.get("/{chat_session_id}/messages", response_model=list[MessageRead])
