@@ -12,13 +12,13 @@ Content-Type: application/json
   "api_key": "sk-test-openai-1234567890"
 }
 
-### 2) Gemini 키 생성
+### 2) Google 키 생성
 POST {{baseUrl}}/llm-api-keys/
 Content-Type: application/json
 
 {
-  "provider": "gemini",
-  "api_key": "gemini-test-key-abcdef123456"
+  "provider": "google",
+  "api_key": "google-test-key-abcdef123456"
 }
 
 ### 3) 전체 키 목록 조회 (api_key_masked 확인)
@@ -41,8 +41,8 @@ GET {{baseUrl}}/llm-api-keys/
 ### 7) OpenAI 다시 활성화
 PATCH {{baseUrl}}/llm-api-keys/openai/active?is_active=true
 
-### 8) Gemini 키 삭제
-DELETE {{baseUrl}}/llm-api-keys/gemini
+### 8) Google 키 삭제
+DELETE {{baseUrl}}/llm-api-keys/google
 
 ### 9) 삭제 후 목록 조회
 GET {{baseUrl}}/llm-api-keys/

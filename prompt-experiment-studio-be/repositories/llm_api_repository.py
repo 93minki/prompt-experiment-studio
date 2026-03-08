@@ -1,24 +1,21 @@
-from optparse import Option
 from typing import Optional
+
 from sqlalchemy.orm import Session
-from sqlalchemy.sql.operators import is_associative
 
 from models.llm_api import LLMApiKeyModel
 
-PROVIDER_ALIASES = {"gemini": "google"}
+SUPPORTED_PROVIDERS = {"openai", "google", "anthropic"}
 
 
 def normalize_provider(provider: str) -> str:
-    raw = provider.strip().lower()
-    return PROVIDER_ALIASES.get(raw, raw)
+    normalized = provider.strip().lower()
+    if normalized not in SUPPORTED_PROVIDERS:
+        raise ValueError(f"Unsupported provider: {provider}")
+    return normalized
 
 
 def _provider_candidates(provider: str) -> list[str]:
-    raw = provider.strip().lower()
-    normalized = normalize_provider(raw)
-    if raw == normalized:
-        return [normalized]
-    return [normalized, raw]
+    return [normalize_provider(provider)]
 
 
 def _mask_api_key(api_key: str) -> str:

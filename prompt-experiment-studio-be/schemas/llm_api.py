@@ -1,9 +1,11 @@
 from datetime import datetime
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
 class LLMApiKeyCreate(BaseModel):
-    provider: str = Field(..., min_length=1, max_length=30)
+    provider: Literal["openai", "google", "anthropic"]
     api_key: str = Field(..., min_length=1)
 
 

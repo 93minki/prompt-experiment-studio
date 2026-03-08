@@ -18,11 +18,14 @@ def get_all_llm_api_keys(db: Session = Depends(get_db)):
 def create_or_update_llm_api_key(
     payload: LLMApiKeyCreate, db: Session = Depends(get_db)
 ):
-    row = llm_api_repo.create_or_update_api_key(
-        db=db,
-        provider=payload.provider,
-        api_key=payload.api_key,
-    )
+    try:
+        row = llm_api_repo.create_or_update_api_key(
+            db=db,
+            provider=payload.provider,
+            api_key=payload.api_key,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     return llm_api_repo.to_read_schema_dict(row)
 
 
@@ -30,15 +33,21 @@ def create_or_update_llm_api_key(
 def update_llm_api_key(
     provider: str, payload: LLMApiKeyUpdate, db: Session = Depends(get_db)
 ):
-    existing = llm_api_repo.get_by_provider(db, provider)
+    try:
+        existing = llm_api_repo.get_by_provider(db, provider)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     if not existing:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="LLM API key not found"
         )
 
-    row = llm_api_repo.create_or_update_api_key(
-        db=db, provider=provider, api_key=payload.api_key
-    )
+    try:
+        row = llm_api_repo.create_or_update_api_key(
+            db=db, provider=provider, api_key=payload.api_key
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     return llm_api_repo.to_read_schema_dict(row)
 
 
@@ -46,7 +55,10 @@ def update_llm_api_key(
 def update_llm_apiKey_active(
     provider: str, is_active: bool, db: Session = Depends(get_db)
 ):
-    row = llm_api_repo.set_active(db, provider, is_active)
+    try:
+        row = llm_api_repo.set_active(db, provider, is_active)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     if not row:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Provider key not found"
@@ -56,7 +68,10 @@ def update_llm_apiKey_active(
 
 @router.delete("/{provider}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_llm_api_key(provider: str, db: Session = Depends(get_db)):
-    deleted = llm_api_repo.delete_by_provider(db, provider)
+    try:
+        deleted = llm_api_repo.delete_by_provider(db, provider)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     if not deleted:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Provider key not found"
