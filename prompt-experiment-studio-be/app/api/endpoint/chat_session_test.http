@@ -1,0 +1,29 @@
+@baseUrl = http://127.0.0.1:8000
+
+### health check
+GET {{baseUrl}}/
+
+### chat session 생성
+POST {{baseUrl}}/chat-sessions/
+Content-Type: application/json
+
+{
+  "title": "첫 세션"
+}
+
+### chat session 목록
+GET {{baseUrl}}/chat-sessions/
+
+### chat session 단건 조회 (id 바꿔서 테스트)
+GET {{baseUrl}}/chat-sessions/1
+
+### chat session 제목 수정
+PATCH {{baseUrl}}/chat-sessions/1/title
+Content-Type: application/json
+
+{
+  "title": "수정된 세션 제목"
+}
+
+### chat session 삭제
+DELETE {{baseUrl}}/chat-sessions/1

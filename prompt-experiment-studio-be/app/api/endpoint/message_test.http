@@ -1,0 +1,51 @@
+@baseUrl = http://127.0.0.1:8000
+@model = gpt-4o
+@provider = openai
+
+### 0) 테스트용 세션 생성
+# @name createChatSession
+POST {{baseUrl}}/chat-sessions/
+Content-Type: application/json
+
+{
+  "title": "E2E messages flow"
+}
+
+### 1) 생성된 세션 ID
+@chatSessionId = {{createChatSession.response.body.$.id}}
+
+### 2) provider API 키 등록/갱신 (실키로 교체)
+POST {{baseUrl}}/llm-api-keys/
+Content-Type: application/json
+
+{
+  "provider": "{{provider}}",
+  "api_key": "YOUR_REAL_API_KEY"
+}
+
+### 3) 첫 턴 (user_message + model)
+POST {{baseUrl}}/chat-sessions/{{chatSessionId}}/messages/turn
+Content-Type: application/json
+
+{
+  "user_message": "파이썬에서 리스트 컴프리헨션이 뭐야?",
+  "model": "{{model}}"
+}
+
+### 4) 둘째 턴
+POST {{baseUrl}}/chat-sessions/{{chatSessionId}}/messages/turn
+Content-Type: application/json
+
+{
+  "user_message": "예시도 보여줘.",
+  "model": "{{model}}"
+}
+
+### 5) 원본 메시지 조회
+GET {{baseUrl}}/chat-sessions/{{chatSessionId}}/messages
+
+### 6) 현재 요약 조회
+GET {{baseUrl}}/chat-sessions/{{chatSessionId}}/messages/summary
+
+### 7) 테스트 종료 후 세션 삭제(원하면 실행)
+DELETE {{baseUrl}}/chat-sessions/{{chatSessionId}}
