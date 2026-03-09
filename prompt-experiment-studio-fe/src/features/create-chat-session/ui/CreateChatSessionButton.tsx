@@ -44,39 +44,35 @@ export const CreateChatSessionButton = ({
   };
 
   return (
-    <>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger>
-          {isCreating ? "생성 중..." : "New Session"}
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>새로운 세션을 생성합니다.</DialogTitle>
-            <DialogDescription>
-              세션 이름과 시스템 프롬프트를 작성해주세요.
-            </DialogDescription>
-          </DialogHeader>
-          <Input
-            placeholder="세션 이름"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-          <Textarea
-            placeholder="시스템 프롬프트"
-            className="min-h-96 max-h-128 resize-none"
-            value={systemMessage}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-              setSystemMessage(e.target.value)
-            }
-          />
-          <DialogFooter>
-            <Button onClick={() => void handleCreate()} disabled={isCreating}>
-              생성
-            </Button>
-            <DialogClose>취소</DialogClose>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger>{isCreating ? "생성 중..." : "New Session"}</DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>새로운 세션을 생성합니다.</DialogTitle>
+          <DialogDescription>
+            세션 이름과 시스템 프롬프트를 작성해주세요.
+          </DialogDescription>
+        </DialogHeader>
+        <Input
+          placeholder="세션 이름"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <Textarea
+          placeholder="시스템 프롬프트"
+          className="min-h-96 max-h-128 resize-none"
+          value={systemMessage}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+            setSystemMessage(e.target.value)
+          }
+        />
+        <DialogFooter>
+          <Button onClick={() => void handleCreate()} disabled={isCreating}>
+            생성
+          </Button>
+          <DialogClose>취소</DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };

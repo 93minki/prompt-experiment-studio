@@ -1,27 +1,9 @@
 import { http } from "@/shared/api/http";
-import axios, { AxiosError } from "axios";
 import type {
   ChatSession,
   CreateChatSessionPayload,
   UpdateChatSessionTitlePayload,
 } from "../model/types";
-
-export const getListChatSessions = async () => {
-  try {
-    const response = await axios.get<ChatSession[]>(
-      "http://localhost:8000/chat-sessions",
-    );
-    return response.data;
-  } catch (error) {
-    const axiosError = error as AxiosError<{ detail?: string }>;
-    const message =
-      axiosError.response?.data?.detail ??
-      axiosError.message ??
-      "세션 목록을 불러오지 못했습니다.";
-
-    throw new Error(message);
-  }
-};
 
 export const chatSessionApi = {
   async list(): Promise<ChatSession[]> {

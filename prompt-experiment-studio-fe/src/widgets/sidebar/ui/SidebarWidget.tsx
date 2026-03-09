@@ -5,7 +5,6 @@ import {
 } from "@/app/entities/chat-session";
 import { useChatSessionList } from "@/features/browse-chat-sessions";
 import { CreateChatSessionButton } from "@/features/create-chat-session";
-import { SettingsModalWidget } from "@/features/settings-modal/ui/SettingsModalWidget";
 import { Button } from "@/shared/ui/button";
 import {
   Sidebar,
@@ -16,10 +15,12 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/shared/ui/sidebar";
+import { SettingsModal } from "@/widgets/sidebar/ui/SettingsModal";
 
 export const SidebarWidget = () => {
   const { state } = useSidebar();
   const { sessions, isLoading, errorMessage, refetch } = useChatSessionList();
+
   const activeSessionId = useActiveSessionId();
   const setActiveSessionId = useSetActiveSessionId();
 
@@ -60,7 +61,7 @@ export const SidebarWidget = () => {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <SettingsModalWidget state={state} />
+        <SettingsModal state={state} />
       </SidebarFooter>
     </Sidebar>
   );
