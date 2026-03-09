@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 from pydantic import BaseModel, Field
 
 
@@ -16,6 +17,8 @@ class SystemPromptRead(BaseModel):
     content: str
     version: int
     is_current: bool
+    is_archived: bool
+    archived_at: Optional[datetime]
     created_at: datetime
     updated_at: datetime
 

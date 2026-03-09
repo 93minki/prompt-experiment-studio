@@ -16,6 +16,8 @@ import {
 } from "@/shared/ui/dialog";
 import { SidebarMenu } from "@/shared/ui/sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
+import { Textarea } from "@/shared/ui/textarea";
+import axios from "axios";
 import { Settings } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -31,21 +33,16 @@ export const SettingsModal = ({ state }: SettingsModalProps) => {
     null,
   );
   const [deletingVersion, setDeletingVersion] = useState<number | null>(null);
+  const [newPromptContent, setNewPromptContent] = useState("");
+  const [isCreatingPrompt, setIsCreatingPrompt] = useState(false);
 
-  const handleActivatePrompt = async (version: number) => {
-    if (!activeSessionId) return;
-    setActivatingVersion(version);
-    try {
-      await systemPromptApi.changeCurrent(activeSessionId, version);
-      toast.success(`v${version} 시스템 프롬프트가 활성화되었습니다.`);
-      await refetch();
-    } catch (error) {
-      console.error("시스템 프롬프트 활성화 실패", error);
-      toast.error("시스템 프롬프트를 활성화하지 못했습니다.");
-    } finally {
-      setActivatingVersion(null);
-    }
-  };
+  const activeSessionId = useActiveSessionId();
+
+  const { systemPrompts, isLoading, refetch, errorMessage } =
+    useSystemPromptList({
+      sessionId: activeSessionId,
+      enabled: open && activeTab === "prompt",
+    });
 
   const handleDeletePrompt = async (version: number) => {
     if (!activeSessionId) return;
@@ -62,22 +59,58 @@ export const SettingsModal = ({ state }: SettingsModalProps) => {
     }
   };
 
-  const activeSessionId = useActiveSessionId();
+  const handleActivatePrompt = async (version: number) => {
+    if (!activeSessionId) return;
+    setActivatingVersion(version);
+    try {
+      await systemPromptApi.changeCurrent(activeSessionId, version);
+      toast.success(`v${version} 시스템 프롬프트가 활성화되었습니다.`);
+      await refetch();
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const detail = (error.response?.data as { detail?: string } | undefined)
+          ?.detail;
+        toast.error(detail ?? "시스템 프롬프트를 활성화하지 못했습니다.");
+      } else {
+        toast.error("시스템 프롬프트를 활성화하지 못했습니다.");
+      }
+    } finally {
+      setActivatingVersion(null);
+    }
+  };
 
-  const { systemPrompts, isLoading, refetch, errorMessage } =
-    useSystemPromptList({
-      sessionId: activeSessionId,
-      enabled: open && activeTab === "prompt",
-    });
+  const handleCreatePrompt = async () => {
+    if (!activeSessionId) return;
+
+    const content = newPromptContent.trim();
+    if (!content) {
+      toast.error("시스템 프롬프트 내용을 입력해주세요.");
+      return;
+    }
+
+    setIsCreatingPrompt(true);
+    try {
+      await systemPromptApi.create(activeSessionId, { content });
+      toast.success("시스템 프롬프트를 추가했습니다.");
+      setNewPromptContent("");
+      await refetch();
+    } catch (error) {
+      console.error("시스템 프롬프트 추가 실패", error);
+      toast.error("시스템 프롬프트를 추가하지 못했습니다.");
+    } finally {
+      setIsCreatingPrompt(false);
+    }
+  };
 
   return (
     <SidebarMenu>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger
-          className={`${state === "expanded" ? "self-end" : "self-center"}`}
+          className={state === "expanded" ? "self-end" : "self-center"}
         >
           <Settings />
         </DialogTrigger>
+
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Settings</DialogTitle>
@@ -86,6 +119,7 @@ export const SettingsModal = ({ state }: SettingsModalProps) => {
               있습니다.
             </DialogDescription>
           </DialogHeader>
+
           <Tabs
             value={activeTab}
             onValueChange={(value) => setActiveTab(value as "prompt" | "api")}
@@ -94,12 +128,39 @@ export const SettingsModal = ({ state }: SettingsModalProps) => {
               <TabsTrigger value="prompt">Prompt</TabsTrigger>
               <TabsTrigger value="api">API</TabsTrigger>
             </TabsList>
+
             <TabsContent value="prompt" className="pt-4">
               {!activeSessionId && (
-                <p className="text-sm text-muted-foreground">
+                <p className="mb-3 text-sm text-muted-foreground">
                   먼저 세션을 선택해주세요.
                 </p>
               )}
+
+              <div className="mb-4 space-y-2">
+                <p className="text-sm font-medium">새 시스템 프롬프트</p>
+                <Textarea
+                  value={newPromptContent}
+                  onChange={(e) => setNewPromptContent(e.target.value)}
+                  placeholder="새 시스템 프롬프트를 입력하세요."
+                  rows={4}
+                  disabled={!activeSessionId || isCreatingPrompt}
+                />
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-muted-foreground">
+                    현재 {newPromptContent.trim().length}자
+                  </p>
+                  <Button
+                    onClick={() => void handleCreatePrompt()}
+                    disabled={
+                      !activeSessionId ||
+                      !newPromptContent.trim() ||
+                      isCreatingPrompt
+                    }
+                  >
+                    {isCreatingPrompt ? "추가 중..." : "프롬프트 추가"}
+                  </Button>
+                </div>
+              </div>
 
               {activeSessionId && isLoading && (
                 <p className="text-sm text-muted-foreground">불러오는 중...</p>
@@ -124,8 +185,10 @@ export const SettingsModal = ({ state }: SettingsModalProps) => {
                 />
               )}
             </TabsContent>
+
             <ApiConnection />
           </Tabs>
+
           <DialogFooter>
             <DialogClose asChild>
               <Button variant="outline">닫기</Button>

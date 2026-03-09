@@ -1,7 +1,10 @@
+from datetime import datetime, timezone
 from typing import Optional
+
 from sqlalchemy.orm import Session
-from models.system_prompt import SystemPromptModel
+
 from models.chat_session import ChatSessionModel
+from models.system_prompt import SystemPromptModel
 
 
 def get_current_system_prompt(
@@ -12,19 +15,22 @@ def get_current_system_prompt(
         .filter(
             SystemPromptModel.chat_session_id == chat_session_id,
             SystemPromptModel.is_current.is_(True),
+            SystemPromptModel.is_archived.is_(False),
         )
         .order_by(SystemPromptModel.version.desc())
         .first()
     )
 
 
-def list_system_prompts(db: Session, chat_session_id: int) -> list[SystemPromptModel]:
-    return (
-        db.query(SystemPromptModel)
-        .filter(SystemPromptModel.chat_session_id == chat_session_id)
-        .order_by(SystemPromptModel.version.desc())
-        .all()
+def list_system_prompts(
+    db: Session, chat_session_id: int, include_archived: bool = False
+) -> list[SystemPromptModel]:
+    query = db.query(SystemPromptModel).filter(
+        SystemPromptModel.chat_session_id == chat_session_id
     )
+    if not include_archived:
+        query = query.filter(SystemPromptModel.is_archived.is_(False))
+    return query.order_by(SystemPromptModel.version.desc()).all()
 
 
 def _allocate_next_version(db: Session, chat_session_id: int) -> int:
@@ -66,6 +72,8 @@ def create_initial_system_prompt(
         content=content,
         version=next_version,
         is_current=True,
+        is_archived=False,
+        archived_at=None,
     )
     db.add(prompt)
     db.commit()
@@ -86,31 +94,13 @@ def upsert_current_system_prompt(
         content=content,
         version=next_version,
         is_current=True,
+        is_archived=False,
+        archived_at=None,
     )
     db.add(new_prompt)
     db.commit()
     db.refresh(new_prompt)
     return new_prompt
-
-
-def delete_system_prompt_by_version(
-    db: Session, chat_session_id: int, version: int
-) -> bool:
-    prompt = (
-        db.query(SystemPromptModel)
-        .filter(
-            SystemPromptModel.chat_session_id == chat_session_id,
-            SystemPromptModel.version == version,
-        )
-        .first()
-    )
-
-    if not prompt:
-        return False
-
-    db.delete(prompt)
-    db.commit()
-    return True
 
 
 def get_system_prompt_by_version(
@@ -126,6 +116,46 @@ def get_system_prompt_by_version(
     )
 
 
+def archive_system_prompt_by_version(
+    db: Session, chat_session_id: int, version: int
+) -> Optional[SystemPromptModel]:
+    prompt = get_system_prompt_by_version(db, chat_session_id, version)
+    if not prompt:
+        return None
+
+    if prompt.is_current:
+        raise ValueError("Cannot archive current active system prompt")
+
+    if prompt.is_archived:
+        return prompt
+
+    prompt.is_archived = True
+    prompt.archived_at = datetime.now(timezone.utc)
+    prompt.is_current = False
+    db.add(prompt)
+    db.commit()
+    db.refresh(prompt)
+    return prompt
+
+
+def restore_system_prompt_by_version(
+    db: Session, chat_session_id: int, version: int
+) -> Optional[SystemPromptModel]:
+    prompt = get_system_prompt_by_version(db, chat_session_id, version)
+    if not prompt:
+        return None
+
+    if not prompt.is_archived:
+        return prompt
+
+    prompt.is_archived = False
+    prompt.archived_at = None
+    db.add(prompt)
+    db.commit()
+    db.refresh(prompt)
+    return prompt
+
+
 def activate_system_prompt_version(
     db: Session, chat_session_id: int, version: int
 ) -> Optional[SystemPromptModel]:
@@ -133,10 +163,14 @@ def activate_system_prompt_version(
     if not target:
         return None
 
-    current = get_current_system_prompt(db, chat_session_id)
-    if current and current.id != target.id:
-        current.is_current = False
-        db.add(current)
+    if target.is_archived:
+        raise ValueError("Cannot activate archived system prompt")
+
+    if target.is_current:
+        return target
+
+    _deactivate_current_prompts(db, chat_session_id)
+    db.flush()
 
     target.is_current = True
     db.add(target)

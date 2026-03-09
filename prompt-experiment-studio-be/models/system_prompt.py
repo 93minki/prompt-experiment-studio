@@ -1,15 +1,16 @@
 from sqlalchemy import (
+    Boolean,
     Column,
+    DateTime,
     ForeignKey,
+    Index,
     Integer,
     Text,
-    Boolean,
-    DateTime,
     UniqueConstraint,
     func,
-    Index,
     text,
 )
+
 from core.database import Base
 
 
@@ -17,13 +18,15 @@ class SystemPromptModel(Base):
     __tablename__ = "system_prompts"
     __table_args__ = (
         UniqueConstraint(
-            "chat_session_id", "version", name="uq_system_prompt_session_version"
+            "chat_session_id",
+            "version",
+            name="uq_system_prompt_session_version",
         ),
         Index(
             "uq_system_prompt_current_per_session",
             "chat_session_id",
             unique=True,
-            sqlite_where=text("is_current = 1"),
+            sqlite_where=text("is_current = 1 AND is_archived = 0"),
         ),
     )
 
@@ -37,6 +40,9 @@ class SystemPromptModel(Base):
     content = Column(Text, nullable=False)
     version = Column(Integer, nullable=False, default=1)
     is_current = Column(Boolean, nullable=False, default=True)
+
+    is_archived = Column(Boolean, nullable=False, default=False, server_default="0")
+    archived_at = Column(DateTime(timezone=True), nullable=True)
 
     created_at = Column(
         DateTime(timezone=True),
