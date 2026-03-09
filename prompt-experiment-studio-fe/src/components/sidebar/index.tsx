@@ -1,5 +1,3 @@
-import { Settings } from "lucide-react";
-import SystemPrompt from "../prompt/SystemPrompt";
 import { Button } from "@/shared/ui/button";
 import {
   Dialog,
@@ -23,7 +21,9 @@ import {
   useSidebar,
 } from "@/shared/ui/sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
-import ApiConnection from "./ApiConnection";
+import { Settings } from "lucide-react";
+import ApiConnection from "../../features/api-connection/ui/ApiConnection";
+import SystemPrompt from "../prompt/SystemPrompt";
 
 const SidebarContainer = () => {
   const { state } = useSidebar();

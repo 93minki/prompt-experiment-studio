@@ -2,7 +2,7 @@ import {
   ChatSessionList,
   useActiveSessionId,
   useSetActiveSessionId,
-} from "@/app/entities/chat-session";
+} from "@/entities/chat-session";
 import { useChatSessionList } from "@/features/browse-chat-sessions";
 import { CreateChatSessionButton } from "@/features/create-chat-session";
 import { Button } from "@/shared/ui/button";

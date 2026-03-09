@@ -1,7 +1,7 @@
-import { useActiveSessionId } from "@/app/entities/chat-session";
-import { systemPromptApi } from "@/app/entities/system-prompt";
-import { SystemPromptList } from "@/app/entities/system-prompt/ui/SystemPromptList";
-import ApiConnection from "@/components/sidebar/ApiConnection";
+import { useActiveSessionId } from "@/entities/chat-session";
+import { systemPromptApi } from "@/entities/system-prompt";
+import { SystemPromptList } from "@/entities/system-prompt/ui/SystemPromptList";
+import { ApiConnection } from "@/features/api-connection";
 import { useSystemPromptList } from "@/features/browse-system-prompts";
 import { Button } from "@/shared/ui/button";
 import {

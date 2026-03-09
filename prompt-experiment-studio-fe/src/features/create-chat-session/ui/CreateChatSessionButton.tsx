@@ -1,4 +1,4 @@
-import { chatSessionApi, type ChatSession } from "@/app/entities/chat-session";
+import { chatSessionApi, type ChatSession } from "@/entities/chat-session";
 import { Button } from "@/shared/ui/button";
 import {
   Dialog,

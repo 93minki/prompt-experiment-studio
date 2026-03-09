@@ -1,7 +1,4 @@
-import {
-  type SystemPrompt,
-  systemPromptApi,
-} from "@/app/entities/system-prompt";
+import { type SystemPrompt, systemPromptApi } from "@/entities/system-prompt";
 import { useCallback, useEffect, useState } from "react";
 
 interface UseSystemPromptListProps {

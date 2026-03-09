@@ -1,4 +1,4 @@
-import { type ChatSession, chatSessionApi } from "@/app/entities/chat-session";
+import { type ChatSession, chatSessionApi } from "@/entities/chat-session";
 import { useCallback, useEffect, useState } from "react";
 
 export const useChatSessionList = () => {
