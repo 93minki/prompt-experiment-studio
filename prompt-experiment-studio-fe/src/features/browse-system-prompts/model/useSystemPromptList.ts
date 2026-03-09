@@ -41,46 +41,6 @@ export const useSystemPromptList = ({
     }
   }, [enabled, sessionId]);
 
-  const deleteSystemPrompt = useCallback(
-    async (version: number) => {
-      if (!enabled) return;
-      if (sessionId === null) return;
-
-      setIsLoading(true);
-      setErrorMessage(null);
-
-      try {
-        await systemPromptApi.delete(sessionId, version);
-      } catch (error) {
-        console.error("시스템 프롬프트 삭제 실패", error);
-        setErrorMessage("시스템 프롬프트를 삭제하지 못했습니다.");
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [enabled, sessionId],
-  );
-
-  const changeCurrentSystemPrompt = useCallback(
-    async (version: number) => {
-      if (!enabled) return;
-      if (sessionId === null) return;
-
-      setIsLoading(true);
-      setErrorMessage(null);
-
-      try {
-        await systemPromptApi.changeCurrent(sessionId, version);
-      } catch (error) {
-        console.error("시스템 프롬프트 업데이트 실패", error);
-        setErrorMessage("시스템 프롬프트를 업데이트하지 못했습니다.");
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [enabled, sessionId],
-  );
-
   useEffect(() => {
     void fetchSystemPrompts();
   }, [fetchSystemPrompts]);
@@ -90,7 +50,5 @@ export const useSystemPromptList = ({
     isLoading,
     errorMessage,
     refetch: fetchSystemPrompts,
-    deleteSystemPrompt,
-    changeCurrentSystemPrompt,
   };
 };

@@ -3,12 +3,18 @@ import { SystemPromptItem } from "./SystemPromptItem";
 
 interface SystemPromptListProps {
   systemPrompts: SystemPrompt[];
-  onSelect?: (version: number) => void;
+  onActivate?: (version: number) => void;
+  onDelete?: (version: number) => Promise<void> | void;
+  activatingVersion?: number | null;
+  deletingVersion?: number | null;
 }
 
 export const SystemPromptList = ({
   systemPrompts,
-  onSelect,
+  onActivate,
+  onDelete,
+  activatingVersion = null,
+  deletingVersion = null,
 }: SystemPromptListProps) => {
   if (systemPrompts.length === 0) {
     return (
@@ -17,15 +23,19 @@ export const SystemPromptList = ({
       </p>
     );
   }
+
   return (
-    <>
-      {systemPrompts.map((systemPrompt) => (
+    <div className="max-h-72 space-y-2 overflow-auto pr-1">
+      {systemPrompts.map((prompt) => (
         <SystemPromptItem
-          key={systemPrompt.id}
-          systemPrompt={systemPrompt}
-          onSelect={onSelect}
+          key={prompt.id}
+          systemPrompt={prompt}
+          onActivate={onActivate}
+          onDelete={onDelete}
+          isActivating={activatingVersion === prompt.version}
+          isDeleting={deletingVersion === prompt.version}
         />
       ))}
-    </>
+    </div>
   );
 };

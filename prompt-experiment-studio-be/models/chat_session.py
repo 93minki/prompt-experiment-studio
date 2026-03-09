@@ -19,3 +19,9 @@ class ChatSessionModel(Base):
         onupdate=func.now(),
         nullable=False,
     )
+    last_system_prompt_version = Column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
+    )

@@ -1,4 +1,5 @@
 import { useActiveSessionId } from "@/app/entities/chat-session";
+import { systemPromptApi } from "@/app/entities/system-prompt";
 import { SystemPromptList } from "@/app/entities/system-prompt/ui/SystemPromptList";
 import ApiConnection from "@/components/sidebar/ApiConnection";
 import { useSystemPromptList } from "@/features/browse-system-prompts";
@@ -17,6 +18,7 @@ import { SidebarMenu } from "@/shared/ui/sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
 import { Settings } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 interface SettingsModalProps {
   state: "expanded" | "collapsed";
@@ -25,6 +27,40 @@ interface SettingsModalProps {
 export const SettingsModal = ({ state }: SettingsModalProps) => {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"prompt" | "api">("prompt");
+  const [activatingVersion, setActivatingVersion] = useState<number | null>(
+    null,
+  );
+  const [deletingVersion, setDeletingVersion] = useState<number | null>(null);
+
+  const handleActivatePrompt = async (version: number) => {
+    if (!activeSessionId) return;
+    setActivatingVersion(version);
+    try {
+      await systemPromptApi.changeCurrent(activeSessionId, version);
+      toast.success(`v${version} 시스템 프롬프트가 활성화되었습니다.`);
+      await refetch();
+    } catch (error) {
+      console.error("시스템 프롬프트 활성화 실패", error);
+      toast.error("시스템 프롬프트를 활성화하지 못했습니다.");
+    } finally {
+      setActivatingVersion(null);
+    }
+  };
+
+  const handleDeletePrompt = async (version: number) => {
+    if (!activeSessionId) return;
+    setDeletingVersion(version);
+    try {
+      await systemPromptApi.delete(activeSessionId, version);
+      toast.success("프롬프트를 삭제했습니다.");
+      await refetch();
+    } catch (error) {
+      console.error(error);
+      toast.error("프롬프트 삭제에 실패했습니다.");
+    } finally {
+      setDeletingVersion(null);
+    }
+  };
 
   const activeSessionId = useActiveSessionId();
 
@@ -33,10 +69,7 @@ export const SettingsModal = ({ state }: SettingsModalProps) => {
       sessionId: activeSessionId,
       enabled: open && activeTab === "prompt",
     });
-  const { changeCurrentSystemPrompt } = useSystemPromptList({
-    sessionId: activeSessionId,
-    enabled: open && activeTab === "prompt",
-  });
+
   return (
     <SidebarMenu>
       <Dialog open={open} onOpenChange={setOpen}>
@@ -61,15 +94,17 @@ export const SettingsModal = ({ state }: SettingsModalProps) => {
               <TabsTrigger value="prompt">Prompt</TabsTrigger>
               <TabsTrigger value="api">API</TabsTrigger>
             </TabsList>
-            <TabsContent value="prompt">
+            <TabsContent value="prompt" className="pt-4">
               {!activeSessionId && (
                 <p className="text-sm text-muted-foreground">
                   먼저 세션을 선택해주세요.
                 </p>
               )}
+
               {activeSessionId && isLoading && (
                 <p className="text-sm text-muted-foreground">불러오는 중...</p>
               )}
+
               {activeSessionId && errorMessage && (
                 <div className="flex items-center gap-2">
                   <p className="text-sm text-red-500">{errorMessage}</p>
@@ -82,7 +117,10 @@ export const SettingsModal = ({ state }: SettingsModalProps) => {
               {activeSessionId && !isLoading && !errorMessage && (
                 <SystemPromptList
                   systemPrompts={systemPrompts}
-                  onSelect={changeCurrentSystemPrompt}
+                  onActivate={handleActivatePrompt}
+                  onDelete={handleDeletePrompt}
+                  activatingVersion={activatingVersion}
+                  deletingVersion={deletingVersion}
                 />
               )}
             </TabsContent>
