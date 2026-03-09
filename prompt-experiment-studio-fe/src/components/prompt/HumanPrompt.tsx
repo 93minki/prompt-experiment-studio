@@ -1,5 +1,5 @@
 import { useRef, useState, type ChangeEvent } from "react";
-import { Button } from "../ui/button";
+import { Button } from "@/shared/ui/button";
 import {
   Select,
   SelectContent,
@@ -7,8 +7,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
-import { Textarea } from "../ui/textarea";
+} from "@/shared/ui/select";
+import { Textarea } from "@/shared/ui/textarea";
 
 interface HumanPromptProps {
   updatePrevQuestion: (message: string) => void;

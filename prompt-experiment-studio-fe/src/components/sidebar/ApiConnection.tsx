@@ -1,10 +1,10 @@
 import axios from "axios";
 import { useEffect, useState, type ChangeEvent } from "react";
 import { toast } from "sonner";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { TabsContent } from "../ui/tabs";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
+import { TabsContent } from "@/shared/ui/tabs";
 
 type Provider = "openai" | "google" | "anthropic";
 

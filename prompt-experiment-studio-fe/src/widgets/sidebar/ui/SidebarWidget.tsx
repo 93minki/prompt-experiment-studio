@@ -1,35 +1,62 @@
-import { Button } from "@/components/ui/button";
+import {
+  ChatSessionList,
+  useActiveSessionId,
+  useSetActiveSessionId,
+} from "@/app/entities/chat-session";
+import { useChatSessionList } from "@/features/browse-chat-sessions";
+import { CreateChatSessionButton } from "@/features/create-chat-session";
+import { SettingsModalWidget } from "@/features/settings-modal/ui/SettingsModalWidget";
+import { Button } from "@/shared/ui/button";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
   SidebarHeader,
-  SidebarMenuButton,
   SidebarTrigger,
   useSidebar,
-} from "@/components/ui/sidebar";
-import { SettingsModalWidget } from "@/features/settings-modal/ui/SettingsModalWidget";
+} from "@/shared/ui/sidebar";
 
 export const SidebarWidget = () => {
   const { state } = useSidebar();
+  const { sessions, isLoading, errorMessage, refetch } = useChatSessionList();
+  const activeSessionId = useActiveSessionId();
+  const setActiveSessionId = useSetActiveSessionId();
+
+  const handleCreated = async (createdId: number) => {
+    setActiveSessionId(createdId);
+    await refetch();
+  };
 
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
         <SidebarTrigger className="self-end" />
         {state === "expanded" ? (
-          <Button>New Session</Button>
+          <CreateChatSessionButton
+            onCreated={(session) => void handleCreated(session.id)}
+          />
         ) : (
           <Button>+</Button>
         )}
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup className="flex flex-col gap-2">
-          <SidebarMenuButton>Hello</SidebarMenuButton>
-          <SidebarMenuButton>Hello</SidebarMenuButton>
-          <SidebarMenuButton>Hello</SidebarMenuButton>
-          <SidebarMenuButton>Hello</SidebarMenuButton>
+          {isLoading && (
+            <p className="text-sm text-muted-foreground">불러오는 중...</p>
+          )}
+          {errorMessage && (
+            <Button variant="outline" onClick={() => void refetch()}>
+              다시 시도
+            </Button>
+          )}
+          {!isLoading && !errorMessage && (
+            <ChatSessionList
+              sessions={sessions}
+              activeSessionId={activeSessionId}
+              onSelect={setActiveSessionId}
+            />
+          )}
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>

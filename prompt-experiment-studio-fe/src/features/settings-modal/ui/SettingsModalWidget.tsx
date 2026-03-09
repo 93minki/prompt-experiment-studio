@@ -1,6 +1,6 @@
 import SystemPrompt from "@/components/prompt/SystemPrompt";
 import ApiConnection from "@/components/sidebar/ApiConnection";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -10,9 +10,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { SidebarMenu } from "@/components/ui/sidebar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from "@/shared/ui/dialog";
+import { SidebarMenu } from "@/shared/ui/sidebar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
 import { Settings } from "lucide-react";
 
 interface SettingsModalWidgetProps {

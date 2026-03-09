@@ -1,6 +1,6 @@
 import { useState, type ChangeEvent } from "react";
-import { Button } from "../ui/button";
-import { Textarea } from "../ui/textarea";
+import { Button } from "@/shared/ui/button";
+import { Textarea } from "@/shared/ui/textarea";
 
 const SystemPrompt = () => {
   const [systemMessage, setSystemMessage] = useState("");

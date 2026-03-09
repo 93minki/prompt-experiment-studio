@@ -1,6 +1,6 @@
 import { Settings } from "lucide-react";
 import SystemPrompt from "../prompt/SystemPrompt";
-import { Button } from "../ui/button";
+import { Button } from "@/shared/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../ui/dialog";
+} from "@/shared/ui/dialog";
 import {
   Sidebar,
   SidebarContent,
@@ -21,8 +21,8 @@ import {
   SidebarMenuButton,
   SidebarTrigger,
   useSidebar,
-} from "../ui/sidebar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+} from "@/shared/ui/sidebar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
 import ApiConnection from "./ApiConnection";
 
 const SidebarContainer = () => {

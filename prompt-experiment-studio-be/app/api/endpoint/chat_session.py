@@ -31,7 +31,9 @@ def get_chat_session(chat_session_id: int, db: Session = Depends(get_db)):
 @router.post("/", response_model=ChatSessionRead, status_code=status.HTTP_201_CREATED)
 def create_chat_session(payload: ChatSessionCreate, db: Session = Depends(get_db)):
     chat_session = chat_session_repo.create_chat_session(db, payload.title)
-    system_prompt_repo.create_initial_system_prompt(db, chat_session.id)
+    system_prompt_repo.create_initial_system_prompt(
+        db, chat_session.id, payload.system_message
+    )
     return chat_session
 
 
