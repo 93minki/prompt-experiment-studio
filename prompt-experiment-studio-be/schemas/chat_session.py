@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 
 class ChatSessionCreate(BaseModel):
     title: str = Field(default="New Session", max_length=120)
+    system_message: str = Field(default="You are a helpful assistant.", min_length=1)
 
 
 class ChatSessionUpdateTitle(BaseModel):

@@ -8,7 +8,8 @@ POST {{baseUrl}}/chat-sessions/
 Content-Type: application/json
 
 {
-  "title": "첫 세션"
+  "title": "테스트 세션",
+  "system_message": "You are a helpful assistant."
 }
 
 ### chat session 목록
