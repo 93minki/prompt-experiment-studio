@@ -22,7 +22,7 @@ import {
 } from "@/shared/ui/sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
 import { Settings } from "lucide-react";
-import ApiConnection from "../../features/api-connection/ui/ApiConnection";
+import { ApiConnection } from "../../features/api-connection/ui/ApiConnection";
 import SystemPrompt from "../prompt/SystemPrompt";
 
 const SidebarContainer = () => {

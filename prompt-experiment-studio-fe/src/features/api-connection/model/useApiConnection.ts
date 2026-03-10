@@ -1,10 +1,10 @@
 import {
-  EMPTY_PROVIDER_STATUS,
-  providerKeyApi,
+  EMPTY_API_KEY_STATUS,
+  apiKeyApi,
   PROVIDERS,
+  type ApiKeyStatus,
   type Provider,
-  type ProviderStatus,
-} from "@/entities/provider-key";
+} from "@/entities/api-key";
 import { useCallback, useEffect, useState } from "react";
 
 export const useApiConnection = () => {
@@ -15,8 +15,8 @@ export const useApiConnection = () => {
   });
 
   const [providerStatus, setProviderStatus] = useState<
-    Record<Provider, ProviderStatus>
-  >(EMPTY_PROVIDER_STATUS);
+    Record<Provider, ApiKeyStatus>
+  >(EMPTY_API_KEY_STATUS);
 
   const [isLoadingKeys, setIsLoadingKeys] = useState(false);
   const [isSaving, setIsSaving] = useState<Record<Provider, boolean>>({
@@ -40,8 +40,8 @@ export const useApiConnection = () => {
   const fetchKeys = useCallback(async () => {
     setIsLoadingKeys(true);
     try {
-      const rows = await providerKeyApi.list();
-      const next = { ...EMPTY_PROVIDER_STATUS };
+      const rows = await apiKeyApi.list();
+      const next = { ...EMPTY_API_KEY_STATUS };
       for (const row of rows) {
         next[row.provider] = {
           exists: true,
@@ -77,7 +77,7 @@ export const useApiConnection = () => {
     setMessageByProvider((prev) => ({ ...prev, [provider]: null }));
 
     try {
-      await providerKeyApi.update(provider, trimmed);
+      await apiKeyApi.update(provider, trimmed);
       setApiKeys((prev) => ({ ...prev, [provider]: "" }));
       await fetchKeys();
       const msg = providerStatus[provider].exists
@@ -102,7 +102,7 @@ export const useApiConnection = () => {
     setMessageByProvider((prev) => ({ ...prev, [provider]: null }));
 
     try {
-      await providerKeyApi.remove(provider);
+      await apiKeyApi.remove(provider);
       setApiKeys((prev) => ({ ...prev, [provider]: "" }));
       await fetchKeys();
       const msg = "API 키 삭제 완료";

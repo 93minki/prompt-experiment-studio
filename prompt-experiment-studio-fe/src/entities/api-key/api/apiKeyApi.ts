@@ -1,9 +1,9 @@
 import { http } from "@/shared/api/http";
-import type { Provider, ProviderKeyRow } from "../model/types";
+import type { ApiKeyRow, Provider } from "../model/types";
 
-export const providerKeyApi = {
-  async list(): Promise<ProviderKeyRow[]> {
-    const { data } = await http.get<ProviderKeyRow[]>("/llm-api-keys");
+export const apiKeyApi = {
+  async list(): Promise<ApiKeyRow[]> {
+    const { data } = await http.get<ApiKeyRow[]>("/llm-api-keys");
     return data;
   },
 
