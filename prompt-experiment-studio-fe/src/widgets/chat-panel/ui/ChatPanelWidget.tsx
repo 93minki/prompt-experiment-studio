@@ -1,42 +1,84 @@
-import HumanPrompt from "@/components/prompt/HumanPrompt";
 import { useActiveSessionId } from "@/entities/chat-session";
-import { useEffect, useRef, useState } from "react";
+import { MessageList, type CreateChatTurnPayload } from "@/entities/message";
+import { useChatMessageList } from "@/features/browse-chat-messages";
+import { ChatComposer, useSendChatTurn } from "@/features/send-chat-turn";
+import { Button } from "@/shared/ui/button";
+import { useEffect, useRef } from "react";
 
 export const ChatPanelWidget = () => {
-  const [prevQuestion, setPrevQuestion] = useState<string[]>([]);
+  const activeSessionId = useActiveSessionId();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const currentSessionId = useActiveSessionId();
 
-  const updatePrevQuestion = (message: string) => {
-    setPrevQuestion([...prevQuestion, message]);
-  };
+  const { messages, isLoading, errorMessage, refetch, appendTurn } =
+    useChatMessageList({
+      sessionId: activeSessionId,
+      enabled: activeSessionId !== null,
+    });
+
+  const {
+    sendTurn,
+    isSending,
+    errorMessage: sendErrorMessage,
+  } = useSendChatTurn({
+    sessionId: activeSessionId,
+    onSuccess: appendTurn,
+  });
 
   useEffect(() => {
     scrollContainerRef.current?.scrollTo({
       top: scrollContainerRef.current.scrollHeight,
       behavior: "smooth",
     });
-  }, [prevQuestion.length]);
-  if (!currentSessionId) {
+  }, [messages.length]);
+
+  if (activeSessionId === null) {
     return (
-      <div>
-        <p>세션을 선택해주세요</p>
-        <p>세션이 없다면 새로운 세션을 생성하세요</p>
+      <div className="flex w-full flex-1 items-center justify-center p-4">
+        <div className="rounded-md border px-6 py-8 text-center">
+          <p className="text-base font-medium">세션을 선택해주세요.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            사이드바에서 세션을 선택하거나 새로 생성하세요.
+          </p>
+        </div>
       </div>
     );
   }
 
+  const handleSend = async (payload: CreateChatTurnPayload) => {
+    return sendTurn(payload);
+  };
+
   return (
-    <div className="flex flex-col gap-2 w-full py-2 min-h-0 flex-1 p-4">
+    <div className="flex flex-col gap-3 w-full min-h-0 flex-1 p-4">
       <div
         ref={scrollContainerRef}
-        className="flex-1 min-h-0 border border-black rounded-md p-2 overflow-y-auto max-h-full"
+        className="flex-1 min-h-0 border rounded-md p-3 overflow-y-auto"
       >
-        {prevQuestion.map((question, index) => (
-          <div key={index}>{question}</div>
-        ))}
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">대화를 불러오는 중...</p>
+        ) : (
+          <MessageList messages={messages} />
+        )}
       </div>
-      <HumanPrompt updatePrevQuestion={updatePrevQuestion} />
+
+      {errorMessage && (
+        <div className="flex items-center gap-2">
+          <p className="text-sm text-red-500">{errorMessage}</p>
+          <Button variant="outline" onClick={() => void refetch()}>
+            다시 시도
+          </Button>
+        </div>
+      )}
+
+      {sendErrorMessage && (
+        <p className="text-sm text-red-500">{sendErrorMessage}</p>
+      )}
+
+      <ChatComposer
+        disabled={isLoading || isSending}
+        isSending={isSending}
+        onSend={handleSend}
+      />
     </div>
   );
 };
