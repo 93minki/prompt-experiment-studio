@@ -69,43 +69,6 @@ def list_context_messages(db: Session, chat_session_id: int) -> list[MessageMode
     return list_messages(db, chat_session_id, include_in_context=True)
 
 
-def get_message_by_id(
-    db: Session,
-    chat_session_id: int,
-    message_id: int,
-) -> Optional[MessageModel]:
-    return (
-        db.query(MessageModel)
-        .filter(
-            MessageModel.chat_session_id == chat_session_id,
-            MessageModel.id == message_id,
-        )
-        .first()
-    )
-
-
-def update_message_context_inclusion(
-    db: Session,
-    chat_session_id: int,
-    message_id: int,
-    include_in_context: bool,
-) -> tuple[Optional[MessageModel], bool]:
-    row = get_message_by_id(db, chat_session_id, message_id)
-    if not row:
-        return None, False
-
-    if row.include_in_context == include_in_context:
-        return row, False
-
-    row.include_in_context = include_in_context
-    row.excluded_at = None if include_in_context else datetime.now(timezone.utc)
-
-    db.add(row)
-    db.commit()
-    db.refresh(row)
-    return row, True
-
-
 def get_message_summary(
     db: Session, chat_session_id: int
 ) -> Optional[MessageSummaryModel]:
@@ -166,3 +129,38 @@ def upsert_message_summary(
     db.commit()
     db.refresh(row)
     return row
+
+
+def update_turn_context_inclusion(
+    db: Session,
+    chat_session_id: int,
+    turn_index: int,
+    include_in_context: bool,
+) -> tuple[list[MessageModel], bool]:
+    rows = (
+        db.query(MessageModel)
+        .filter(
+            MessageModel.chat_session_id == chat_session_id,
+            MessageModel.turn_index == turn_index,
+        )
+        .order_by(MessageModel.id.asc())
+        .all()
+    )
+    if not rows:
+        return [], False
+
+    is_changed = any(row.include_in_context != include_in_context for row in rows)
+    if not is_changed:
+        return rows, False
+
+    excluded_at = None if include_in_context else datetime.now(timezone.utc)
+    for row in rows:
+        row.include_in_context = include_in_context
+        row.excluded_at = excluded_at
+        db.add(row)
+
+    db.commit()
+    for row in rows:
+        db.refresh(row)
+
+    return rows, True

@@ -65,41 +65,34 @@ def get_messages(
 
 
 @router.patch(
-    "/{chat_session_id}/messages/{message_id}/context",
-    response_model=MessageRead,
+    "/{chat_session_id}/turns/{turn_index}/context",
+    response_model=list[MessageRead],
 )
-def update_message_context(
+def update_turn_context(
     chat_session_id: int,
-    message_id: int,
+    turn_index: int,
     payload: MessageContextUpdate,
     db: Session = Depends(get_db),
 ):
     _ensure_chat_session_exists(db, chat_session_id)
 
-    message_row, is_changed = message_repo.update_message_context_inclusion(
+    rows, is_changed = message_repo.update_turn_context_inclusion(
         db=db,
         chat_session_id=chat_session_id,
-        message_id=message_id,
+        turn_index=turn_index,
         include_in_context=payload.include_in_context,
     )
-    if not message_row:
+    if not rows:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Message not found",
+            detail="Turn not found",
         )
 
     if is_changed:
-        updated_session = chat_session_repo.increment_context_revision(
-            db, chat_session_id
-        )
-        if not updated_session:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Chat session not found",
-            )
+        chat_session_repo.increment_context_revision(db, chat_session_id)
         message_repo.mark_message_summary_stale(db, chat_session_id)
 
-    return message_row
+    return rows
 
 
 @router.post(
