@@ -25,3 +25,11 @@ class ChatSessionModel(Base):
         default=0,
         server_default="0",
     )
+
+    # 메시지 수정/제외/복구가 일어날 때마다 +1
+    context_revision = Column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
+    )
