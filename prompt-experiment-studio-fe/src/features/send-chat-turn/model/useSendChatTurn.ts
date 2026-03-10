@@ -49,7 +49,7 @@ export const useSendChatTurn = ({
         return true;
       } catch (error) {
         const message = getErrorMessage(error);
-        setErrorMessage(getErrorMessage(message));
+        setErrorMessage(message);
         return false;
       } finally {
         setIsSending(false);
