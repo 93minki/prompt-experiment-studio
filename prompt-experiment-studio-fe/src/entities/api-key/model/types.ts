@@ -1,4 +1,4 @@
-export type Provider = "openai" | "google" | "anthropic";
+export type Provider = "openai" | "google" | "anthropic" | "tavily";
 
 export type ApiKeyRow = {
   id: number;
@@ -23,10 +23,12 @@ export const PROVIDERS: Array<{
   { key: "openai", label: "OpenAI", placeholder: "sk-..." },
   { key: "google", label: "Google", placeholder: "AIza..." },
   { key: "anthropic", label: "Anthropic", placeholder: "sk-ant-..." },
+  { key: "tavily", label: "Tavily", placeholder: "tvly-..." },
 ];
 
 export const EMPTY_API_KEY_STATUS: Record<Provider, ApiKeyStatus> = {
   openai: { exists: false, isActive: false, masked: null },
   google: { exists: false, isActive: false, masked: null },
   anthropic: { exists: false, isActive: false, masked: null },
+  tavily: { exists: false, isActive: false, masked: null },
 };

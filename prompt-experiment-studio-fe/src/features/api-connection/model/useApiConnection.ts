@@ -1,6 +1,6 @@
 import {
-  EMPTY_API_KEY_STATUS,
   apiKeyApi,
+  EMPTY_API_KEY_STATUS,
   PROVIDERS,
   type ApiKeyStatus,
   type Provider,
@@ -12,22 +12,24 @@ export const useApiConnection = () => {
     openai: "",
     google: "",
     anthropic: "",
+    tavily: "",
   });
 
-  const [providerStatus, setProviderStatus] = useState<
-    Record<Provider, ApiKeyStatus>
-  >(EMPTY_API_KEY_STATUS);
+  const [providerStatus, setProviderStatus] =
+    useState<Record<Provider, ApiKeyStatus>>(EMPTY_API_KEY_STATUS);
 
   const [isLoadingKeys, setIsLoadingKeys] = useState(false);
   const [isSaving, setIsSaving] = useState<Record<Provider, boolean>>({
     openai: false,
     google: false,
     anthropic: false,
+    tavily: false,
   });
   const [isDeleting, setIsDeleting] = useState<Record<Provider, boolean>>({
     openai: false,
     google: false,
     anthropic: false,
+    tavily: false,
   });
   const [messageByProvider, setMessageByProvider] = useState<
     Record<Provider, string | null>
@@ -35,6 +37,7 @@ export const useApiConnection = () => {
     openai: null,
     google: null,
     anthropic: null,
+    tavily: null,
   });
 
   const fetchKeys = useCallback(async () => {

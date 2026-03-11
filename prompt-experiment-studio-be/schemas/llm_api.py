@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 
 class LLMApiKeyCreate(BaseModel):
-    provider: Literal["openai", "google", "anthropic"]
+    provider: Literal["openai", "google", "anthropic", "tavily"]
     api_key: str = Field(..., min_length=1)
 
 
