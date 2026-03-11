@@ -17,8 +17,15 @@ interface ChatComposerProps {
   onSend: (payload: CreateChatTurnPayload) => Promise<boolean>;
 }
 
+// "openai": ["gpt-4o", "gpt-4o-mini", "gpt-5", "gpt-5-nano"],
+// "google": ["gemini-2.5-flash", "gemini-2.5-pro"],
+
 const MODEL_OPTIONS = [
   { value: "gpt-4o", label: "GPT-4o" },
+  { value: "gpt-4o-mini", label: "GPT-4o Mini" },
+  { value: "gpt-5", label: "GPT-5" },
+  { value: "gpt-5-nano", label: "GPT-5 Nano" },
+  { value: "gemini-2.5-pro", label: "Gemini 2.5 Pro" },
   { value: "gemini-2.5-flash", label: "Gemini 2.5 Flash" },
 ];
 

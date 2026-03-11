@@ -34,9 +34,9 @@ export const MessageBubble = ({
         )}
       >
         <MarkdownParser content={message.content} />
-        <p className="mt-1 text-[10px] opacity-70">
+        {/* <p className="mt-1 text-[10px] opacity-70">
           turn {message.turn_index} · v{message.system_prompt_version}
-        </p>
+        </p> */}
 
         {isContextEditMode && showContextToggle && (
           <div className="mt-2 flex items-center justify-end gap-2">
