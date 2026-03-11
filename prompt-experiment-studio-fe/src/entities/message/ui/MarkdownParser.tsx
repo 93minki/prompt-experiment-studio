@@ -21,6 +21,16 @@ export const MarkdownParser = ({ content }: MarkdownParserProps) => {
             <h3 className="mb-1.5 mt-2 text-sm font-bold">{children}</h3>
           ),
           p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+          a: ({ href, children }) => (
+            <a
+              href={href}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="font-medium text-blue-600 underline underline-offset-2 hover:text-blue-500"
+            >
+              {children}
+            </a>
+          ),
           ul: ({ children }) => (
             <ul className="mb-2 list-disc pl-5 space-y-0.5">{children}</ul>
           ),

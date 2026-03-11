@@ -1,7 +1,7 @@
 import tiktoken
 from sqlalchemy.orm import Session
 
-from core.llm import invoke_chat, resolve_provider_by_model
+from core.llm import invoke_chat, invoke_chat_with_web_search, resolve_provider_by_model
 from models.message import MessageModel
 from models.message_summary import MessageSummaryModel
 from repositories import chat_session_repository as chat_session_repo
@@ -155,6 +155,13 @@ def _resolve_api_key(db: Session, model: str) -> str:
     api_key_row = llm_api_repo.get_active_by_provider(db, provider)
     if not api_key_row:
         raise ValueError(f"No active API key found for provider: {provider}")
+    return api_key_row.api_key
+
+
+def _resolve_tavily_api_key(db: Session) -> str | None:
+    api_key_row = llm_api_repo.get_active_by_provider(db, "tavily")
+    if not api_key_row:
+        return None
     return api_key_row.api_key
 
 
@@ -319,6 +326,7 @@ def run_chat_turn_with_llm(
         raise ValueError("Current System Prompt not found")
 
     api_key = _resolve_api_key(db, model)
+    tavily_api_key = _resolve_tavily_api_key(db)
 
     all_context_messages = message_repo.list_context_messages(db, chat_session_id)
     summary_row = message_repo.get_message_summary(db, chat_session_id)
@@ -397,11 +405,12 @@ def run_chat_turn_with_llm(
             "Context is too large to process. Please shorten the current question or system prompt."
         )
 
-    assistant_message = invoke_chat(
+    assistant_message = invoke_chat_with_web_search(
         model=model,
         api_key=api_key,
         system_prompt=runtime_system_prompt,
         user_message=runtime_user_message,
+        tavily_api_key=tavily_api_key,
     )
 
     user_row, assistant_row = message_repo.create_chat_turn(
