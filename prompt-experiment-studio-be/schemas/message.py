@@ -9,6 +9,14 @@ class ChatTurnCreate(BaseModel):
     model: str = Field(default="gpt-4o", min_length=1)
 
 
+class MessageContextUpdate(BaseModel):
+    include_in_context: bool
+
+
+class MessageSummaryRegenerate(BaseModel):
+    model: str = Field(default="gpt-4o", min_length=1)
+
+
 class MessageRead(BaseModel):
     id: int
     chat_session_id: int
@@ -16,7 +24,10 @@ class MessageRead(BaseModel):
     content: str
     turn_index: int
     system_prompt_version: int
+    include_in_context: bool
+    excluded_at: Optional[datetime]
     created_at: datetime
+    updated_at: datetime
 
     model_config = {"from_attributes": True}
 
@@ -27,14 +38,16 @@ class MessageSummaryRead(BaseModel):
     summary_text: str
     summary_until_message_id: Optional[int]
     based_on_system_prompt_version: int
+    summary_version: int
+    is_stale: bool
+    based_on_context_revision: int
     created_at: datetime
     updated_at: datetime
 
     model_config = {"from_attributes": True}
 
+
 class ChatTurnRead(BaseModel):
-  user: MessageRead
-  assistant: MessageRead
-  summary: MessageSummaryRead
-  
-  
+    user: MessageRead
+    assistant: MessageRead
+    summary: Optional[MessageSummaryRead] = None

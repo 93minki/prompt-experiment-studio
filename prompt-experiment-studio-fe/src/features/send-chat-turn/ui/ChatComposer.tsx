@@ -17,8 +17,15 @@ interface ChatComposerProps {
   onSend: (payload: CreateChatTurnPayload) => Promise<boolean>;
 }
 
+// "openai": ["gpt-4o", "gpt-4o-mini", "gpt-5", "gpt-5-nano"],
+// "google": ["gemini-2.5-flash", "gemini-2.5-pro"],
+
 const MODEL_OPTIONS = [
   { value: "gpt-4o", label: "GPT-4o" },
+  { value: "gpt-4o-mini", label: "GPT-4o Mini" },
+  { value: "gpt-5", label: "GPT-5" },
+  { value: "gpt-5-nano", label: "GPT-5 Nano" },
+  { value: "gemini-2.5-pro", label: "Gemini 2.5 Pro" },
   { value: "gemini-2.5-flash", label: "Gemini 2.5 Flash" },
 ];
 
@@ -80,9 +87,9 @@ export const ChatComposer = ({
         </SelectContent>
       </Select>
 
-      <div className="flex min-w-0 w-full items-end gap-2">
+      <div className="relative flex min-w-0 w-full items-end gap-2 border rounded-md p-1 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:border-transparent">
         <Textarea
-          className="field-sizing-fixed min-h-10 max-h-32 min-w-0 w-full resize-none overflow-x-hidden overflow-y-hidden whitespace-pre-wrap break-all leading-6"
+          className="border-none field-sizing-fixed min-h-10 max-h-32 min-w-0 w-[97%] resize-none overflow-x-hidden overflow-y-hidden whitespace-pre-wrap break-all leading-6 focus-visible:outline-none focus-visible:ring-0"
           placeholder="메시지를 입력하세요"
           rows={1}
           value={humanMessage}
@@ -101,7 +108,7 @@ export const ChatComposer = ({
           }}
         />
         <Button
-          className="h-full w-20 max-h-20 rounded-full"
+          className="absolute right-2 bottom-1 w-10 h-10 rounded-full"
           onClick={() => void handleSubmit()}
           disabled={disabled || isSending || !humanMessage.trim()}
         >

@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import Optional
 
 from sqlalchemy import func
@@ -31,6 +32,7 @@ def create_chat_turn(
         content=user_message,
         turn_index=turn_index,
         system_prompt_version=system_prompt_version,
+        include_in_context=True,
     )
     assistant_row = MessageModel(
         chat_session_id=chat_session_id,
@@ -38,6 +40,7 @@ def create_chat_turn(
         content=assistant_message,
         turn_index=turn_index,
         system_prompt_version=system_prompt_version,
+        include_in_context=True,
     )
 
     db.add(user_row)
@@ -48,21 +51,50 @@ def create_chat_turn(
     return user_row, assistant_row
 
 
-def list_messages(db: Session, chat_session_id: int) -> list[MessageModel]:
-    return (
-        db.query(MessageModel)
-        .filter(MessageModel.chat_session_id == chat_session_id)
-        .order_by(MessageModel.turn_index.asc(), MessageModel.id.asc())
-        .all()
+def list_messages(
+    db: Session,
+    chat_session_id: int,
+    include_in_context: Optional[bool] = None,
+) -> list[MessageModel]:
+    query = db.query(MessageModel).filter(
+        MessageModel.chat_session_id == chat_session_id
     )
+    if include_in_context is not None:
+        query = query.filter(MessageModel.include_in_context.is_(include_in_context))
+
+    return query.order_by(MessageModel.turn_index.asc(), MessageModel.id.asc()).all()
 
 
-def get_message_summary(db: Session, chat_session_id: int) -> Optional[MessageSummaryModel]:
+def list_context_messages(db: Session, chat_session_id: int) -> list[MessageModel]:
+    return list_messages(db, chat_session_id, include_in_context=True)
+
+
+def get_message_summary(
+    db: Session, chat_session_id: int
+) -> Optional[MessageSummaryModel]:
     return (
         db.query(MessageSummaryModel)
         .filter(MessageSummaryModel.chat_session_id == chat_session_id)
         .first()
     )
+
+
+def mark_message_summary_stale(
+    db: Session,
+    chat_session_id: int,
+) -> Optional[MessageSummaryModel]:
+    row = get_message_summary(db, chat_session_id)
+    if row is None:
+        return None
+
+    if row.is_stale:
+        return row
+
+    row.is_stale = True
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return row
 
 
 def upsert_message_summary(
@@ -71,6 +103,7 @@ def upsert_message_summary(
     summary_text: str,
     summary_until_message_id: Optional[int],
     based_on_system_prompt_version: int,
+    based_on_context_revision: int,
 ) -> MessageSummaryModel:
     row = get_message_summary(db, chat_session_id)
     if row is None:
@@ -79,14 +112,55 @@ def upsert_message_summary(
             summary_text=summary_text,
             summary_until_message_id=summary_until_message_id,
             based_on_system_prompt_version=based_on_system_prompt_version,
+            based_on_context_revision=based_on_context_revision,
+            summary_version=1,
+            is_stale=False,
         )
         db.add(row)
     else:
         row.summary_text = summary_text
         row.summary_until_message_id = summary_until_message_id
         row.based_on_system_prompt_version = based_on_system_prompt_version
+        row.based_on_context_revision = based_on_context_revision
+        row.summary_version += 1
+        row.is_stale = False
         db.add(row)
 
     db.commit()
     db.refresh(row)
     return row
+
+
+def update_turn_context_inclusion(
+    db: Session,
+    chat_session_id: int,
+    turn_index: int,
+    include_in_context: bool,
+) -> tuple[list[MessageModel], bool]:
+    rows = (
+        db.query(MessageModel)
+        .filter(
+            MessageModel.chat_session_id == chat_session_id,
+            MessageModel.turn_index == turn_index,
+        )
+        .order_by(MessageModel.id.asc())
+        .all()
+    )
+    if not rows:
+        return [], False
+
+    is_changed = any(row.include_in_context != include_in_context for row in rows)
+    if not is_changed:
+        return rows, False
+
+    excluded_at = None if include_in_context else datetime.now(timezone.utc)
+    for row in rows:
+        row.include_in_context = include_in_context
+        row.excluded_at = excluded_at
+        db.add(row)
+
+    db.commit()
+    for row in rows:
+        db.refresh(row)
+
+    return rows, True
