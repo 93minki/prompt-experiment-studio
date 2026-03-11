@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from models.llm_api import LLMApiKeyModel
 
-SUPPORTED_PROVIDERS = {"openai", "google", "anthropic"}
+SUPPORTED_PROVIDERS = {"openai", "google", "anthropic", "tavily"}
 
 
 def normalize_provider(provider: str) -> str:

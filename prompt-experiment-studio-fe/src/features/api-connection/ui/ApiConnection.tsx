@@ -1,3 +1,4 @@
+import { type Provider } from "@/entities/api-key";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
@@ -19,27 +20,20 @@ export const ApiConnection = () => {
     remove,
   } = useApiConnection();
 
-  const onSave = async (provider: "openai" | "google" | "anthropic") => {
+  const onSave = async (provider: Provider) => {
     const result = await save(provider);
     if (!result.message) return;
-
-    if (result.ok) {
-      toast.success(result.message);
-    } else {
-      toast.error(result.message);
-    }
+    if (result.ok) toast.success(result.message);
+    else toast.error(result.message);
   };
 
-  const onDelete = async (provider: "openai" | "google" | "anthropic") => {
+  const onDelete = async (provider: Provider) => {
     const result = await remove(provider);
     if (!result.message) return;
-
-    if (result.ok) {
-      toast.success(result.message);
-    } else {
-      toast.error(result.message);
-    }
+    if (result.ok) toast.success(result.message);
+    else toast.error(result.message);
   };
+
   return (
     <TabsContent value="api" className="flex flex-col gap-4 pt-4">
       {isLoadingKeys && (
