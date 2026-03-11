@@ -1,6 +1,7 @@
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 import type { ChatMessage } from "../model/types";
+import { MarkdownParser } from "./MarkdownParser";
 
 interface MessageBubbleProps {
   message: ChatMessage;
@@ -32,19 +33,17 @@ export const MessageBubble = ({
           !message.include_in_context && "opacity-60 border border-dashed",
         )}
       >
-        <p>{message.content}</p>
+        <MarkdownParser content={message.content} />
         <p className="mt-1 text-[10px] opacity-70">
           turn {message.turn_index} · v{message.system_prompt_version}
         </p>
 
         {isContextEditMode && showContextToggle && (
           <div className="mt-2 flex items-center justify-end gap-2">
-            {!message.include_in_context && (
-              <span className="text-[10px] opacity-70">컨텍스트 제외됨</span>
-            )}
             <Button
               type="button"
               size="sm"
+              className="text-black"
               variant={message.include_in_context ? "outline" : "secondary"}
               disabled={isUpdatingContext}
               onClick={() => void onToggleContext?.(message)}

@@ -80,9 +80,9 @@ export const ChatComposer = ({
         </SelectContent>
       </Select>
 
-      <div className="flex min-w-0 w-full items-end gap-2">
+      <div className="relative flex min-w-0 w-full items-end gap-2 border rounded-md p-1 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:border-transparent">
         <Textarea
-          className="field-sizing-fixed min-h-10 max-h-32 min-w-0 w-full resize-none overflow-x-hidden overflow-y-hidden whitespace-pre-wrap break-all leading-6"
+          className="border-none field-sizing-fixed min-h-10 max-h-32 min-w-0 w-[97%] resize-none overflow-x-hidden overflow-y-hidden whitespace-pre-wrap break-all leading-6 focus-visible:outline-none focus-visible:ring-0"
           placeholder="메시지를 입력하세요"
           rows={1}
           value={humanMessage}
@@ -101,7 +101,7 @@ export const ChatComposer = ({
           }}
         />
         <Button
-          className="h-full w-20 max-h-20 rounded-full"
+          className="absolute right-2 bottom-1 w-10 h-10 rounded-full"
           onClick={() => void handleSubmit()}
           disabled={disabled || isSending || !humanMessage.trim()}
         >
