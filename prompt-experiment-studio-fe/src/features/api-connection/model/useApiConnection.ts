@@ -66,7 +66,35 @@ export const useApiConnection = () => {
     setApiKeys((prev) => ({ ...prev, [provider]: value }));
   };
 
-  const save = async (provider: Provider) => {
+  const create = async (provider: Provider) => {
+    const trimmed = apiKeys[provider].trim();
+    if (!trimmed) {
+      setMessageByProvider((prev) => ({
+        ...prev,
+        [provider]: "API 키를 입력해주세요.",
+      }));
+      return { ok: false as const, message: "API 키를 입력해주세요." };
+    }
+    setIsSaving((prev) => ({ ...prev, [provider]: true }));
+    setMessageByProvider((prev) => ({ ...prev, [provider]: null }));
+
+    try {
+      await apiKeyApi.create(provider, trimmed);
+      setApiKeys((prev) => ({ ...prev, [provider]: "" }));
+      await fetchKeys();
+      const msg = "API 키 저장 완료";
+      setMessageByProvider((prev) => ({ ...prev, [provider]: msg }));
+      return { ok: true as const, message: msg };
+    } catch {
+      const msg = "API 키 저장에 실패했습니다.";
+      setMessageByProvider((prev) => ({ ...prev, [provider]: msg }));
+      return { ok: false as const, message: msg };
+    } finally {
+      setIsSaving((prev) => ({ ...prev, [provider]: false }));
+    }
+  };
+
+  const update = async (provider: Provider) => {
     const trimmed = apiKeys[provider].trim();
     if (!trimmed) {
       setMessageByProvider((prev) => ({
@@ -83,13 +111,11 @@ export const useApiConnection = () => {
       await apiKeyApi.update(provider, trimmed);
       setApiKeys((prev) => ({ ...prev, [provider]: "" }));
       await fetchKeys();
-      const msg = providerStatus[provider].exists
-        ? "API 키 수정 완료"
-        : "API 키 저장 완료";
+      const msg = "API 키 수정 완료";
       setMessageByProvider((prev) => ({ ...prev, [provider]: msg }));
       return { ok: true as const, message: msg };
     } catch {
-      const msg = "API 키 저장에 실패했습니다.";
+      const msg = "API 키 수정에 실패했습니다.";
       setMessageByProvider((prev) => ({ ...prev, [provider]: msg }));
       return { ok: false as const, message: msg };
     } finally {
@@ -129,7 +155,8 @@ export const useApiConnection = () => {
     isDeleting,
     messageByProvider,
     setKey,
-    save,
+    update,
+    create,
     remove,
   };
 };

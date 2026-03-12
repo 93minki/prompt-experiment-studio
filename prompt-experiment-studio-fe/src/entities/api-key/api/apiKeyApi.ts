@@ -7,8 +7,15 @@ export const apiKeyApi = {
     return data;
   },
 
-  async update(provider: Provider, apiKey: string): Promise<void> {
+  async create(provider: Provider, apiKey: string): Promise<void> {
     await http.post("/llm-api-keys/", { provider, api_key: apiKey });
+  },
+
+  async update(provider: Provider, apiKey: string): Promise<void> {
+    await http.patch(`/llm-api-keys/${provider}`, {
+      provider,
+      api_key: apiKey,
+    });
   },
 
   async remove(provider: Provider): Promise<void> {
