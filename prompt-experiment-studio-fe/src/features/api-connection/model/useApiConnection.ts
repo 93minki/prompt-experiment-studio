@@ -7,7 +7,11 @@ import {
 } from "@/entities/api-key";
 import { useCallback, useEffect, useState } from "react";
 
-export const useApiConnection = () => {
+interface UseApiConnectionProps {
+  enabled: boolean;
+}
+
+export const useApiConnection = ({ enabled }: UseApiConnectionProps) => {
   const [apiKeys, setApiKeys] = useState<Record<Provider, string>>({
     openai: "",
     google: "",
@@ -41,6 +45,8 @@ export const useApiConnection = () => {
   });
 
   const fetchKeys = useCallback(async () => {
+    if (!enabled) return;
+
     setIsLoadingKeys(true);
     try {
       const rows = await apiKeyApi.list();
@@ -56,11 +62,12 @@ export const useApiConnection = () => {
     } finally {
       setIsLoadingKeys(false);
     }
-  }, []);
+  }, [enabled]);
 
   useEffect(() => {
+    if (!enabled) return;
     void fetchKeys();
-  }, [fetchKeys]);
+  }, [enabled, fetchKeys]);
 
   const setKey = (provider: Provider, value: string) => {
     setApiKeys((prev) => ({ ...prev, [provider]: value }));

@@ -6,7 +6,11 @@ import { TabsContent } from "@/shared/ui/tabs";
 import { toast } from "sonner";
 import { useApiConnection } from "../model/useApiConnection";
 
-export const ApiConnection = () => {
+interface ApiConnectionProps {
+  enabled: boolean;
+}
+
+export const ApiConnection = ({ enabled }: ApiConnectionProps) => {
   const {
     providers,
     apiKeys,
@@ -19,7 +23,7 @@ export const ApiConnection = () => {
     create,
     update,
     remove,
-  } = useApiConnection();
+  } = useApiConnection({ enabled });
 
   const onUpdate = async (provider: Provider) => {
     const result = await update(provider);
