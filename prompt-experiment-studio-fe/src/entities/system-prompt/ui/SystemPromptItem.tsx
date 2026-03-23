@@ -26,13 +26,13 @@ export const SystemPromptItem = ({
 }: SystemPromptItemProps) => {
   const [detailOpen, setDetailOpen] = useState(false);
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (systemPrompt.is_current) return;
     const ok = window.confirm(
       `v${systemPrompt.version} 시스템 프롬프트를 삭제하시겠습니까?`,
     );
     if (!ok) return;
-    await onDelete?.(systemPrompt.version);
+    void onDelete?.(systemPrompt.version);
   };
   return (
     <div
