@@ -24,6 +24,19 @@ class MessageSummaryRegenerate(BaseModel):
     model: str = Field(default="gpt-4o", min_length=1)
 
 
+class MessageAttachmentRead(BaseModel):
+    id: int
+    message_id: int
+    name: str
+    mime_type: str
+    data_url: str
+    is_pinned: bool
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
 class MessageRead(BaseModel):
     id: int
     chat_session_id: int
@@ -35,6 +48,7 @@ class MessageRead(BaseModel):
     excluded_at: Optional[datetime]
     created_at: datetime
     updated_at: datetime
+    attachments: list[MessageAttachmentRead] = Field(default_factory=list)
 
     model_config = {"from_attributes": True}
 

@@ -421,6 +421,7 @@ def run_chat_turn_with_llm(
         user_message=user_message,
         assistant_message=assistant_message,
         system_prompt_version=current_prompt.version,
+        images=images,
     )
 
     return user_row, assistant_row, summary_row

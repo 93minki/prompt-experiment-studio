@@ -6,6 +6,7 @@ from app.api.endpoint.chat_session import router as chat_session_router
 from app.api.endpoint.message import router as message_router
 from app.api.endpoint.system_prompt import router as system_prompt_router
 from app.api.endpoint.llm_api import router as llm_api_router
+from models.message_attachment import MessageAttachmentModel
 from core.database import Base, engine
 
 load_dotenv()

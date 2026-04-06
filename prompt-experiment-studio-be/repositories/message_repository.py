@@ -2,8 +2,9 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
+from repositories import message_attachment_repository as attachment_repo
 from models.message import MessageModel
 from models.message_summary import MessageSummaryModel
 
@@ -23,6 +24,7 @@ def create_chat_turn(
     user_message: str,
     assistant_message: str,
     system_prompt_version: int,
+    images: list[dict] | None = None,
 ) -> tuple[MessageModel, MessageModel]:
     turn_index = _get_next_turn_index(db, chat_session_id)
 
@@ -48,6 +50,16 @@ def create_chat_turn(
     db.commit()
     db.refresh(user_row)
     db.refresh(assistant_row)
+
+    normalized_images = images or []
+    if normalized_images:
+        attachment_repo.create_attachments(
+            db=db,
+            message_id=user_row.id,
+            images=normalized_images,
+        )
+        db.refresh(user_row)
+
     return user_row, assistant_row
 
 
@@ -56,9 +68,12 @@ def list_messages(
     chat_session_id: int,
     include_in_context: Optional[bool] = None,
 ) -> list[MessageModel]:
-    query = db.query(MessageModel).filter(
-        MessageModel.chat_session_id == chat_session_id
+    query = (
+        db.query(MessageModel)
+        .options(selectinload(MessageModel.attachments))
+        .filter(MessageModel.chat_session_id == chat_session_id)
     )
+
     if include_in_context is not None:
         query = query.filter(MessageModel.include_in_context.is_(include_in_context))
 

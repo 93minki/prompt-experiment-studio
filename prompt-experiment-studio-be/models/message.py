@@ -11,6 +11,7 @@ from sqlalchemy import (
 )
 
 from core.database import Base
+from sqlalchemy.orm import relationship
 
 
 class MessageModel(Base):
@@ -53,4 +54,12 @@ class MessageModel(Base):
         server_default=func.now(),
         onupdate=func.now(),
         nullable=False,
+    )
+
+    attachments = relationship(
+        "MessageAttachmentModel",
+        back_populates="message",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by="MessageAttachmentModel.created_at.asc(), MessageAttachmentModel.id.asc()",
     )
