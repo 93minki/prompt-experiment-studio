@@ -28,6 +28,9 @@ HARD_CONTEXT_LIMIT_TOKENS = 60_000
 SUMMARY_TARGET_TOKENS = 900
 SUMMARY_MAX_TOKENS = 1_200
 
+MAX_INPUT_IMAGES = 5
+MAX_LLM_IMAGES = 10
+
 
 def _estimate_tokens(text: str, model: str) -> int:
     if not text.strip():
@@ -307,6 +310,23 @@ def regenerate_chat_summary(
     )
 
 
+def _normalize_input_images(
+    images: list[ImageAttachment] | None,
+) -> list[ImageAttachment]:
+    normalized = list(images or [])
+    if len(normalized) > MAX_INPUT_IMAGES:
+        raise ValueError(f"You can upload up to {MAX_INPUT_IMAGES} images per message.")
+    return normalized
+
+
+def _select_images_for_llm(
+    current_images: list[ImageAttachment],
+) -> list[ImageAttachment]:
+    if len(current_images) <= MAX_LLM_IMAGES:
+        return current_images
+    return current_images[-MAX_LLM_IMAGES:]
+
+
 def run_chat_turn_with_llm(
     db: Session,
     chat_session_id: int,
@@ -314,6 +334,8 @@ def run_chat_turn_with_llm(
     model: str,
     images: list[ImageAttachment] | None = None,
 ):
+    input_images = _normalize_input_images(images)
+
     chat_session = chat_session_repo.get_chat_session_by_id(db, chat_session_id)
     if not chat_session:
         raise ValueError("Chat session not found")
@@ -406,13 +428,15 @@ def run_chat_turn_with_llm(
             "Context is too large to process. Please shorten the current question or system prompt."
         )
 
+    llm_images = _select_images_for_llm(input_images)
+
     assistant_message = invoke_chat_with_web_search(
         model=model,
         api_key=api_key,
         system_prompt=runtime_system_prompt,
         user_message=runtime_user_message,
         tavily_api_key=tavily_api_key,
-        images=images,
+        images=llm_images,
     )
 
     user_row, assistant_row = message_repo.create_chat_turn(
@@ -421,7 +445,7 @@ def run_chat_turn_with_llm(
         user_message=user_message,
         assistant_message=assistant_message,
         system_prompt_version=current_prompt.version,
-        images=images,
+        images=input_images,
     )
 
     return user_row, assistant_row, summary_row

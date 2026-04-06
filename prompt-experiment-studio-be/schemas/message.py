@@ -13,7 +13,7 @@ class ImageAttachmentInput(BaseModel):
 class ChatTurnCreate(BaseModel):
     user_message: str = Field(..., min_length=1)
     model: str = Field(default="gpt-4o", min_length=1)
-    images: list[ImageAttachmentInput] = Field(default_factory=list)
+    images: list[ImageAttachmentInput] = Field(default_factory=list, max_length=5)
 
 
 class MessageContextUpdate(BaseModel):

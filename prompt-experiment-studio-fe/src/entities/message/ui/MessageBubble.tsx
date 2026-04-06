@@ -34,13 +34,18 @@ export const MessageBubble = ({
         )}
       >
         {message.attachments.length > 0 && (
-          <div className="mb-2 flex flex-wrap gap-2">
+          <div className="mb-3 flex flex-wrap gap-3">
             {message.attachments.map((attachment) => (
-              <div
-                key={attachment.id}
-                className="rounded-full border px-2 py-1 text-xs opacity-80"
-              >
-                {attachment.name}
+              <div key={attachment.id} className="flex w-40 flex-col gap-2">
+                <div className="overflow-hidden rounded-md border bg-background">
+                  <img
+                    src={attachment.data_url}
+                    alt={attachment.name}
+                    className="h-28 w-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+                <p className="truncate text-xs opacity-80">{attachment.name}</p>
               </div>
             ))}
           </div>
