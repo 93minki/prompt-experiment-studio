@@ -31,6 +31,12 @@ class ImageAttachment(TypedDict):
     data_url: str
 
 
+def _get_image_value(image: Any, key: str) -> str:
+    if isinstance(image, dict):
+        return str(image[key])
+    return str(getattr(image, key))
+
+
 def resolve_provider_by_model(model: str) -> Provider:
     for provider, models in SUPPORTED_MODELS.items():
         if model in models:
@@ -84,31 +90,11 @@ def _build_human_content(
             {
                 "type": "image_url",
                 "image_url": {
-                    "url": image["data_url"],
+                    "url": _get_image_value(image, "data_url"),
                 },
             }
         )
     return blocks
-
-
-def _build_runtime_human_content(
-    history_messages_text: str,
-    current_user_message: str,
-    images: list[ImageAttachment] | None = None,
-) -> list[dict[str, Any]] | str:
-    history_text = history_messages_text.strip()
-
-    if history_text:
-        text = (
-            "[Recent conversation]\n"
-            f"{history_text}\n\n"
-            "[Current user message]\n"
-            f"{current_user_message}"
-        )
-    else:
-        text = current_user_message
-
-    return _build_human_content(text, images)
 
 
 def invoke_chat(
