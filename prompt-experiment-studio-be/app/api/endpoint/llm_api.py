@@ -15,9 +15,7 @@ def get_all_llm_api_keys(db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=LLMApiKeyRead, status_code=status.HTTP_201_CREATED)
-def create_or_update_llm_api_key(
-    payload: LLMApiKeyCreate, db: Session = Depends(get_db)
-):
+def create_llm_api_key(payload: LLMApiKeyCreate, db: Session = Depends(get_db)):
     try:
         row = llm_api_repo.create_or_update_api_key(
             db=db,

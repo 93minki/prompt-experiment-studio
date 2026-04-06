@@ -5,7 +5,6 @@ from ddgs import DDGS
 import httpx
 
 TAVILY_SEARCH_URL = "https://api.tavily.com/search"
-DUCKDUCKGO_SEARCH_URL = "https://api.duckduckgo.com/"
 
 
 class WebSearchResult(TypedDict):
@@ -19,25 +18,6 @@ def _clean_text(value: Any) -> str:
     if value is None:
         return ""
     return str(value).strip()
-
-
-def _extract_ddg_topics(items: list[Any]) -> list[tuple[str, str]]:
-    collected: list[tuple[str, str]] = []
-    for item in items:
-        if not isinstance(item, dict):
-            continue
-
-        if "FirstURL" in item and "Text" in item:
-            url = _clean_text(item.get("FirstURL"))
-            text = _clean_text(item.get("Text"))
-            if url and text:
-                collected.append((text, url))
-            continue
-
-        nested = item.get("Topics")
-        if isinstance(nested, list):
-            collected.extend(_extract_ddg_topics(nested))
-    return collected
 
 
 def _search_tavily(

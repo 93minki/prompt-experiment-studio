@@ -6,7 +6,11 @@ import { TabsContent } from "@/shared/ui/tabs";
 import { toast } from "sonner";
 import { useApiConnection } from "../model/useApiConnection";
 
-export const ApiConnection = () => {
+interface ApiConnectionProps {
+  enabled: boolean;
+}
+
+export const ApiConnection = ({ enabled }: ApiConnectionProps) => {
   const {
     providers,
     apiKeys,
@@ -16,12 +20,20 @@ export const ApiConnection = () => {
     isDeleting,
     messageByProvider,
     setKey,
-    save,
+    create,
+    update,
     remove,
-  } = useApiConnection();
+  } = useApiConnection({ enabled });
 
-  const onSave = async (provider: Provider) => {
-    const result = await save(provider);
+  const onUpdate = async (provider: Provider) => {
+    const result = await update(provider);
+    if (!result.message) return;
+    if (result.ok) toast.success(result.message);
+    else toast.error(result.message);
+  };
+
+  const onCreate = async (provider: Provider) => {
+    const result = await create(provider);
     if (!result.message) return;
     if (result.ok) toast.success(result.message);
     else toast.error(result.message);
@@ -65,14 +77,23 @@ export const ApiConnection = () => {
                 value={apiKeys[key]}
                 onChange={(e) => setKey(key, e.target.value)}
               />
-
-              <Button
-                type="button"
-                disabled={isSaving[key] || isDeleting[key]}
-                onClick={() => void onSave(key)}
-              >
-                {isSaving[key] ? "저장 중..." : status.exists ? "수정" : "저장"}
-              </Button>
+              {status.exists ? (
+                <Button
+                  type="button"
+                  disabled={isSaving[key]}
+                  onClick={() => void onUpdate(key)}
+                >
+                  {isSaving[key] ? "수정 중..." : "수정"}
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  disabled={isSaving[key]}
+                  onClick={() => void onCreate(key)}
+                >
+                  {isSaving[key] ? "저장 중..." : "저장"}
+                </Button>
+              )}
 
               <Button
                 type="button"

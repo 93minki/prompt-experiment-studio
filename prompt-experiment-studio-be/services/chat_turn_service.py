@@ -284,20 +284,11 @@ def regenerate_chat_summary(
     db: Session,
     chat_session_id: int,
     model: str,
+    api_key: str,
+    current_prompt_version: int,
+    current_context_revision: int,
+    chunk_messages: list[MessageModel],
 ) -> MessageSummaryModel:
-    chat_session = chat_session_repo.get_chat_session_by_id(db, chat_session_id)
-    if not chat_session:
-        raise ValueError("Chat session not found")
-
-    current_prompt = system_prompt_repo.get_current_system_prompt(db, chat_session_id)
-    if not current_prompt:
-        raise ValueError("Current System Prompt not found")
-
-    source_messages = message_repo.list_context_messages(db, chat_session_id)
-    if not source_messages:
-        raise ValueError("No context messages available to summarize")
-
-    api_key = _resolve_api_key(db, model)
 
     return _upsert_summary_from_chunk(
         db=db,
@@ -305,9 +296,9 @@ def regenerate_chat_summary(
         model=model,
         api_key=api_key,
         previous_summary="",
-        chunk_messages=source_messages,
-        based_on_system_prompt_version=current_prompt.version,
-        based_on_context_revision=chat_session.context_revision,
+        chunk_messages=chunk_messages,
+        based_on_system_prompt_version=current_prompt_version,
+        based_on_context_revision=current_context_revision,
     )
 
 
@@ -341,6 +332,10 @@ def run_chat_turn_with_llm(
                 db=db,
                 chat_session_id=chat_session_id,
                 model=model,
+                api_key=api_key,
+                current_prompt_version=current_prompt.version,
+                current_context_revision=chat_session.context_revision,
+                chunk_messages=all_context_messages,
             )
         else:
             summary_row = None
