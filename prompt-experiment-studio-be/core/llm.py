@@ -1,10 +1,9 @@
-from typing import Any, Literal
+from typing import Any, Literal, TypedDict
 from langchain_core.messages import (
     AIMessage,
     HumanMessage,
     SystemMessage,
     ToolMessage,
-    tool,
 )
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
@@ -24,6 +23,12 @@ SUPPORTED_MODELS: dict[Provider, list[str]] = {
 WEB_SEARCH_POLICY = """You may use the web_search tool only when external, up-to-date information is required.
 Do not use it for timeless/general knowledge questions.
 When tool results are used, cite source URLs in the final answer."""
+
+
+class ImageAttachment(TypedDict):
+    name: str
+    mime_type: str
+    data_url: str
 
 
 def resolve_provider_by_model(model: str) -> Provider:
@@ -59,12 +64,65 @@ def _content_to_text(content) -> str:
     return str(content).strip()
 
 
-def invoke_chat(model: str, api_key: str, system_prompt: str, user_message: str) -> str:
+def _build_human_content(
+    user_message: str,
+    images: list[ImageAttachment] | None = None,
+) -> list[dict[str, Any]] | str:
+    normalized_text = user_message.strip()
+    normalized_images = images or []
+
+    if not normalized_images:
+        return normalized_text
+
+    blocks: list[dict[str, Any]] = []
+
+    if normalized_text:
+        blocks.append({"type": "text", "text": normalized_text})
+
+    for image in normalized_images:
+        blocks.append(
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": image["data_url"],
+                },
+            }
+        )
+    return blocks
+
+
+def _build_runtime_human_content(
+    history_messages_text: str,
+    current_user_message: str,
+    images: list[ImageAttachment] | None = None,
+) -> list[dict[str, Any]] | str:
+    history_text = history_messages_text.strip()
+
+    if history_text:
+        text = (
+            "[Recent conversation]\n"
+            f"{history_text}\n\n"
+            "[Current user message]\n"
+            f"{current_user_message}"
+        )
+    else:
+        text = current_user_message
+
+    return _build_human_content(text, images)
+
+
+def invoke_chat(
+    model: str,
+    api_key: str,
+    system_prompt: str,
+    user_message: str,
+    images: list[ImageAttachment] | None = None,
+) -> str:
     llm = build_llm(model=model, api_key=api_key)
     response = llm.invoke(
         [
             SystemMessage(content=system_prompt),
-            HumanMessage(content=user_message),
+            HumanMessage(content=_build_human_content(user_message, images)),
         ]
     )
     return _content_to_text(response.content)
@@ -104,6 +162,7 @@ def invoke_chat_with_web_search(
     system_prompt: str,
     user_message: str,
     tavily_api_key: str | None,
+    images: list[ImageAttachment] | None = None,
 ) -> str:
     llm = build_llm(model=model, api_key=api_key)
 
@@ -137,6 +196,7 @@ def invoke_chat_with_web_search(
             api_key=api_key,
             system_prompt=system_prompt,
             user_message=user_message,
+            images=images,
         )
 
     tool_enabled_system_prompt = (
@@ -144,7 +204,7 @@ def invoke_chat_with_web_search(
     )
     messages: list[Any] = [
         SystemMessage(content=tool_enabled_system_prompt),
-        HumanMessage(content=user_message),
+        HumanMessage(content=_build_human_content(user_message, images)),
     ]
 
     for step in range(3):

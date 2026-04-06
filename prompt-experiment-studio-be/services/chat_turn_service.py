@@ -1,7 +1,12 @@
 import tiktoken
 from sqlalchemy.orm import Session
 
-from core.llm import invoke_chat, invoke_chat_with_web_search, resolve_provider_by_model
+from core.llm import (
+    ImageAttachment,
+    invoke_chat,
+    invoke_chat_with_web_search,
+    resolve_provider_by_model,
+)
 from models.message import MessageModel
 from models.message_summary import MessageSummaryModel
 from repositories import chat_session_repository as chat_session_repo
@@ -307,6 +312,7 @@ def run_chat_turn_with_llm(
     chat_session_id: int,
     user_message: str,
     model: str,
+    images: list[ImageAttachment] | None = None,
 ):
     chat_session = chat_session_repo.get_chat_session_by_id(db, chat_session_id)
     if not chat_session:
@@ -406,6 +412,7 @@ def run_chat_turn_with_llm(
         system_prompt=runtime_system_prompt,
         user_message=runtime_user_message,
         tavily_api_key=tavily_api_key,
+        images=images,
     )
 
     user_row, assistant_row = message_repo.create_chat_turn(

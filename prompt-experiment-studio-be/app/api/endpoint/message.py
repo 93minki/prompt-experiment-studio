@@ -42,6 +42,7 @@ def create_chat_turn(
             chat_session_id=chat_session_id,
             user_message=payload.user_message,
             model=payload.model,
+            images=payload.images,
         )
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

@@ -26,9 +26,17 @@ export interface MessageSummary {
   updated_at: string;
 }
 
+export interface ChatImageAttachment {
+  id: string;
+  name: string;
+  mimeType: string;
+  dataUrl: string;
+}
+
 export interface CreateChatTurnPayload {
   userMessage: string;
   model: string;
+  images?: ChatImageAttachment[];
 }
 
 export interface ChatTurn {

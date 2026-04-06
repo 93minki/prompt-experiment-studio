@@ -4,9 +4,16 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 
+class ImageAttachmentInput(BaseModel):
+    name: str = Field(..., min_length=1)
+    mime_type: str = Field(..., min_length=1)
+    data_url: str = Field(..., min_length=1)
+
+
 class ChatTurnCreate(BaseModel):
     user_message: str = Field(..., min_length=1)
     model: str = Field(default="gpt-4o", min_length=1)
+    images: list[ImageAttachmentInput] = Field(default_factory=list)
 
 
 class MessageContextUpdate(BaseModel):

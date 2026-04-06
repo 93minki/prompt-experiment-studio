@@ -36,6 +36,11 @@ export const messageApi = {
       {
         user_message: payload.userMessage,
         model: payload.model,
+        images: (payload.images ?? []).map((image) => ({
+          name: image.name,
+          mime_type: image.mimeType,
+          data_url: image.dataUrl,
+        })),
       },
     );
     return data;
