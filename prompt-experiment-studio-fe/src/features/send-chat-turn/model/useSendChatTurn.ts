@@ -35,7 +35,8 @@ export const useSendChatTurn = ({
       }
 
       const userMessage = payload.userMessage.trim();
-      if (!userMessage) return false;
+      const images = payload.images ?? [];
+      if (!userMessage && images.length === 0) return false;
 
       setIsSending(true);
       setErrorMessage(null);
@@ -44,6 +45,7 @@ export const useSendChatTurn = ({
         const turn = await messageApi.createTurn(sessionId, {
           userMessage,
           model: payload.model,
+          images,
         });
         onSuccess?.(turn);
         return true;

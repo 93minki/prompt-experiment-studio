@@ -33,6 +33,19 @@ export const MessageBubble = ({
           !message.include_in_context && "opacity-60 border border-dashed",
         )}
       >
+        {message.attachments.length > 0 && (
+          <div className="mb-2 flex flex-wrap gap-2">
+            {message.attachments.map((attachment) => (
+              <div
+                key={attachment.id}
+                className="rounded-full border px-2 py-1 text-xs opacity-80"
+              >
+                {attachment.name}
+              </div>
+            ))}
+          </div>
+        )}
+
         <MarkdownParser content={message.content} />
         {/* <p className="mt-1 text-[10px] opacity-70">
           turn {message.turn_index} · v{message.system_prompt_version}

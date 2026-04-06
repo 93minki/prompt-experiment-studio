@@ -1,5 +1,23 @@
 export type MessageRole = "user" | "assistant";
 
+export interface ChatImageAttachment {
+  id: string;
+  name: string;
+  mimeType: string;
+  dataUrl: string;
+}
+
+export interface StoredMessageAttachment {
+  id: number;
+  message_id: number;
+  name: string;
+  mime_type: string;
+  data_url: string;
+  is_pinned: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface ChatMessage {
   id: number;
   chat_session_id: number;
@@ -11,6 +29,7 @@ export interface ChatMessage {
   excluded_at: string | null;
   created_at: string;
   updated_at: string;
+  attachments: StoredMessageAttachment[]
 }
 
 export interface MessageSummary {
@@ -24,13 +43,6 @@ export interface MessageSummary {
   based_on_context_revision: number;
   created_at: string;
   updated_at: string;
-}
-
-export interface ChatImageAttachment {
-  id: string;
-  name: string;
-  mimeType: string;
-  dataUrl: string;
 }
 
 export interface CreateChatTurnPayload {
